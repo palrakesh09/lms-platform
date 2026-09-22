@@ -24,3 +24,17 @@ export const RESOURCE_TYPES = Object.freeze({
 
 // Lowercase words separated by single hyphens, e.g. "how-the-internet-works".
 export const SLUG_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
+
+export const QUESTION_TYPES = Object.freeze({ MCQ_SINGLE: 'mcq-single' });
+
+export const QUIZ_ATTACHMENT_LEVELS = Object.freeze({
+  COURSE: 'course',
+  MODULE: 'module',
+  TOPIC: 'topic',
+  CONCEPT: 'concept',
+});
+
+export const ATTEMPT_STATUS = Object.freeze({
+  IN_PROGRESS: 'in_progress',
+  SUBMITTED: 'submitted',
+});

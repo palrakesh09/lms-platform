@@ -1,6 +1,6 @@
 import { Navigate, Outlet, useLocation } from 'react-router';
 import PageLoader from '../components/PageLoader.jsx';
-import { AUTH_STATUS } from '../context/AuthContext.js';
+import { AUTH_STATUS } from '../context/AuthContext.jsx';
 import { useAuth } from '../hooks/useAuth.js';
 
 // For pages only guests should see (login, register). Once the auth state becomes
@@ -15,7 +15,7 @@ export default function GuestRoute() {
   }
 
   if (status === AUTH_STATUS.AUTHENTICATED) {
-    return <Navigate to={location.state?.from ?? '/account'} replace />;
+    return <Navigate to={location.state?.from ?? '/courses'} replace />;
   }
 
   return <Outlet />;

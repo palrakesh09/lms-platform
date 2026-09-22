@@ -6,3 +6,6 @@ export { default as Topic } from './Topic.js';
 export { default as Concept } from './Concept.js';
 export { default as Resource } from './Resource.js';
 export { default as Progress } from './Progress.js';
+export { default as Quiz } from './Quiz.js';
+export { default as Question } from './Question.js';
+export { default as QuizAttempt } from './QuizAttempt.js';

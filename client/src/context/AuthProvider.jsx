@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import * as authService from '../services/authService.js';
-import { AUTH_STATUS, AuthContext } from './AuthContext.js';
+import { AUTH_STATUS, AuthContext } from './AuthContext.jsx';
 
 const GUEST_STATE = { status: AUTH_STATUS.GUEST, user: null };
 

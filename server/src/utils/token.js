@@ -1,8 +1,8 @@
 import jwt from 'jsonwebtoken';
 import { env } from '../config/env.js';
+import { isObjectIdString } from './objectId.js';
 
 const ALGORITHM = 'HS256';
-const OBJECT_ID_PATTERN = /^[a-f\d]{24}$/i;
 
 // Payload is only { sub, iat, exp }. No role, email or other user data.
 export const signAccessToken = (userId) =>
@@ -16,7 +16,7 @@ export const signAccessToken = (userId) =>
 export const verifyAccessToken = (token) => {
   const { sub } = jwt.verify(token, env.jwtSecret, { algorithms: [ALGORITHM] });
 
-  if (typeof sub !== 'string' || !OBJECT_ID_PATTERN.test(sub)) {
+  if (!isObjectIdString(sub)) {
     throw new jwt.JsonWebTokenError('invalid subject');
   }
   return sub;

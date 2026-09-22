@@ -6,7 +6,9 @@
   "scripts": {
     "start": "node src/server.js",
     "dev": "nodemon src/server.js",
-    "verify:models": "node scripts/verify-models.js"
+    "verify:models": "node scripts/verify-models.js",
+    "create-admin": "node scripts/create-admin.js",
+    "test": "node --test --test-concurrency=1"
   },
   "keywords": [],
   "author": "",
