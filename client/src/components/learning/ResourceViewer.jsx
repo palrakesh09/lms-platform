@@ -9,6 +9,7 @@ import CompletionToggle from './CompletionToggle.jsx';
 import ResourceItem from './ResourceItem.jsx';
 import ResourceTypeBadge from './ResourceTypeBadge.jsx';
 import ConceptQuizList from '../quiz/ConceptQuizList.jsx';
+import ContentRenderer from '../content-renderer/ContentRenderer.jsx';
 
 // Shows one resource. Title, type and the Open button come from the already-loaded structure. The
 // description is fetched separately because the structure endpoint omits it. Nothing is embedded:
@@ -61,13 +62,19 @@ export default function ResourceViewer({ entry, courseId, completed, onCompletio
             </button>
           </p>
         )}
-        {status === REQUEST_STATUS.SUCCESS &&
+                {status === REQUEST_STATUS.SUCCESS &&
           (detail?.description ? (
             <p className="whitespace-pre-line wrap-break-word leading-relaxed text-slate-700">{detail.description}</p>
           ) : (
             <p className="text-sm italic text-slate-600">No description provided.</p>
           ))}
       </div>
+
+     {detail?.content?.blocks?.length > 0 && (
+       <div className="mt-6 border-t border-slate-200 pt-6">
+         <ContentRenderer content={detail.content} />
+       </div>
+     )}
 
       {safeUrl ? (
         <div className="mt-6">
@@ -85,7 +92,6 @@ export default function ResourceViewer({ entry, courseId, completed, onCompletio
           This resource doesn&apos;t have a valid link, so it can&apos;t be opened. Please let your mentor know.
         </p>
       )}
-
       {siblings.length > 1 && (
         <section aria-labelledby="concept-resources-heading" className="mt-10 border-t border-slate-200 pt-6">
           <h2 id="concept-resources-heading" className="text-xs font-semibold uppercase tracking-wide text-slate-600">

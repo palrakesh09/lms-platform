@@ -12,7 +12,7 @@ import {
 const topicSchema = new mongoose.Schema(
   {
     module: requiredRef('Module'),
-    title: titleField(),
+    title: titleField(1),
     slug: slugField(),
     description: textField('Description', 2000),
     order: orderField(),

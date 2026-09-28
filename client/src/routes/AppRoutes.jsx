@@ -27,6 +27,15 @@ import QuizAttemptPage from "../pages/quiz/QuizAttemptPage.jsx";
 import QuizAttemptsPage from "../pages/quiz/QuizAttemptsPage.jsx";
 import QuizDetailPage from "../pages/quiz/QuizDetailPage.jsx";
 import QuizResultPage from "../pages/quiz/QuizResultPage.jsx";
+import AdminAnalyticsPage from "../pages/admin/AdminAnalyticsPage.jsx";
+import MentorAnalyticsPage from "../pages/mentor/MentorAnalyticsPage.jsx";
+import MentorCourseAnalyticsPage from "../pages/mentor/MentorCourseAnalyticsPage.jsx";
+import StudentPerformancePage from "../pages/student/StudentPerformancePage.jsx";
+import AdminEnrollmentsPage from '../pages/admin/AdminEnrollmentsPage.jsx';
+import SearchPage from '../pages/SearchPage.jsx';
+import ActivityPage from '../pages/ActivityPage.jsx';
+import NotificationsPage from '../pages/NotificationsPage.jsx';
+import AnnouncementsPage from '../pages/dashboard/AnnouncementsPage.jsx';
 
 export default function AppRoutes() {
   return (
@@ -40,6 +49,8 @@ export default function AppRoutes() {
         <Route element={<ProtectedRoute />}>
           <Route path="account" element={<AccountPage />} />
           <Route path="courses" element={<CoursesPage />} />
+          <Route path="search" element={<SearchPage />} />
+          <Route path="notifications" element={<NotificationsPage />} />
           <Route path="courses/:courseId" element={<CourseDetailPage />} />
         </Route>
         <Route
@@ -66,6 +77,14 @@ export default function AppRoutes() {
         </Route>
         <Route element={<ProtectedRoute roles={[ROLES.STUDENT]} />}>
           <Route path="my-learning" element={<MyLearningPage />} />
+          <Route path="activity" element={<ActivityPage />} />
+        </Route>
+        <Route element={<ProtectedRoute roles={[ROLES.STUDENT]} />}>
+          <Route path="my-learning" element={<MyLearningPage />} />
+          <Route
+            path="student/performance"
+            element={<StudentPerformancePage />}
+          />
         </Route>
         <Route
           path="student/*"
@@ -82,6 +101,10 @@ export default function AppRoutes() {
         path="admin"
         element={<DashboardGate area="admin" roles={[ROLES.ADMIN]} />}
       >
+        <Route path="announcements" element={<AnnouncementsPage area="admin" />} />
+        <Route path="notifications" element={<NotificationsPage />} />
+        <Route path="analytics" element={<AdminAnalyticsPage />} />
+        <Route path="enrollments" element={<AdminEnrollmentsPage />} />
         <Route index element={<AdminDashboardPage />} />
         <Route path="courses" element={<ManageCoursesPage area="admin" />} />
         <Route
@@ -104,6 +127,13 @@ export default function AppRoutes() {
         path="mentor"
         element={<DashboardGate area="mentor" roles={[ROLES.MENTOR]} />}
       >
+        <Route path="announcements" element={<AnnouncementsPage area="mentor" />} />
+        <Route path="notifications" element={<NotificationsPage />} />
+        <Route path="analytics" element={<MentorAnalyticsPage />} />
+        <Route
+          path="analytics/courses/:courseId"
+          element={<MentorCourseAnalyticsPage />}
+        />
         <Route index element={<MentorDashboardPage />} />
         <Route path="courses" element={<ManageCoursesPage area="mentor" />} />
         <Route

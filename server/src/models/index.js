@@ -9,3 +9,7 @@ export { default as Progress } from './Progress.js';
 export { default as Quiz } from './Quiz.js';
 export { default as Question } from './Question.js';
 export { default as QuizAttempt } from './QuizAttempt.js';
+export { default as Enrollment, ENROLLMENT_STATUS } from './Enrollment.js';
+export { default as Notification } from './Notification.js';
+export { default as Announcement } from './Announcement.js';
+export { default as LearningActivity } from './LearningActivity.js';

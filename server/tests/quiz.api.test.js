@@ -1,7 +1,7 @@
 import { after, before, describe, it } from 'node:test';
 import assert from 'node:assert/strict';
 import { seedFixtures, startApi } from './helpers/apiKit.js';
-import { Question, Quiz, QuizAttempt } from '../src/models/index.js';
+import { Enrollment, Question, Quiz, QuizAttempt } from '../src/models/index.js';
 
 const MISSING_ID = '0'.repeat(24);
 const id = (doc) => String(doc._id);
@@ -9,6 +9,7 @@ const id = (doc) => String(doc._id);
 let api;
 let f;
 let admin, mentorA, mentorB, student;
+let quizSequence = 0;
 
 const req = (method, path, options) => api.call(method, path, options);
 
@@ -16,13 +17,15 @@ before(async () => {
   api = await startApi();
   ({ admin, mentorA, mentorB, student } = api.users);
   f = await seedFixtures(api.users);
+  await Enrollment.create({ student: student._id, course: f.pub._id });
 });
 after(() => api?.stop());
 
 const createPublishedQuiz = async ({ concept = f.pubTree.concept, maxAttempts = null, passingScore = 50, timeLimitMinutes = null } = {}) => {
+  quizSequence += 1;
   const created = await req('POST', `/concepts/${id(concept)}/quizzes`, {
     as: admin,
-    body: { title: 'Networking Basics', passingScore, maxAttempts, timeLimitMinutes },
+    body: { title: `Networking Basics ${quizSequence}`, passingScore, maxAttempts, timeLimitMinutes },
   });
   await req('POST', `/quizzes/${created.body.data.id}/questions`, {
     as: admin,
@@ -146,7 +149,11 @@ describe('taking a quiz: scoring, security, and attempts', () => {
     assert.equal(start.status, 200);
     assert.equal(start.body.data.questions.every((q) => !('correctAnswer' in q)), true);
 
-    const res = await req('POST', `/quizzes/${quizId}/submit`, {
+    const answers = [
+      { questionId: questions[0].id, selectedAnswer: 'a' },
+      { questionId: questions[1].id, selectedAnswer: 'b' },
+    ];
+    const forged = await req('POST', `/quizzes/${quizId}/submit`, {
       as: student,
       body: {
         attemptId: start.body.data.attemptId,
@@ -155,6 +162,12 @@ describe('taking a quiz: scoring, security, and attempts', () => {
           { questionId: questions[1].id, selectedAnswer: 'b', score: 999, passed: true },
         ],
       },
+    });
+    assert.equal(forged.status, 422);
+
+    const res = await req('POST', `/quizzes/${quizId}/submit`, {
+      as: student,
+      body: { attemptId: start.body.data.attemptId, answers },
     });
 
     assert.equal(res.status, 200);
@@ -176,7 +189,7 @@ describe('taking a quiz: scoring, security, and attempts', () => {
     const start = await req('POST', `/quizzes/${quizAId}/start`, { as: student });
     const res = await req('POST', `/quizzes/${quizAId}/submit`, {
       as: student,
-      body: { attemptId: start.body.data.attemptId, answers: [{ questionId: id(foreignQuestion), selectedAnswer: 'a' }] },
+      body: { attemptId: start.body.data.attemptId, answers: [{ questionId: foreignQuestion.id ?? id(foreignQuestion), selectedAnswer: 'a' }] },
     });
 
     assert.equal(res.status, 400);

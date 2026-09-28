@@ -1,7 +1,7 @@
 import { after, before, describe, it } from 'node:test';
 import assert from 'node:assert/strict';
 import { seedFixtures, startApi } from './helpers/apiKit.js';
-import { Concept, Course, Module, Progress, Resource, Topic } from '../src/models/index.js';
+import { Concept, Course, Enrollment, Module, Progress, Resource, Topic } from '../src/models/index.js';
 
 const MISSING_ID = '0'.repeat(24);
 const id = (doc) => String(doc._id);
@@ -17,9 +17,11 @@ before(async () => {
   api = await startApi();
   ({ admin, mentorA, student } = api.users);
   f = await seedFixtures(api.users);
+  await Enrollment.create({ student: student._id, course: f.pub._id });
 
   // A dedicated two-concept published course, so percentage math (50%) is easy to check by hand.
   course = await Course.create({ title: 'Progress Course', slug: 'progress-course', status: 'published', order: 1, createdBy: admin._id });
+  await Enrollment.create({ student: student._id, course: course._id });
   const module_ = await Module.create({ course: course._id, title: 'M1', slug: 'm1', status: 'published', order: 1, createdBy: admin._id });
   const topic = await Topic.create({ module: module_._id, title: 'T1', slug: 't1', status: 'published', order: 1, createdBy: admin._id });
   concept1 = await Concept.create({ topic: topic._id, title: 'C1', slug: 'c1', status: 'published', order: 1, createdBy: admin._id });
@@ -172,6 +174,7 @@ describe('course progress and access tracking', () => {
 
   it('returns zero percent, not an error, for a course with no published concepts', async () => {
     const empty = await Course.create({ title: 'Empty Course', slug: 'empty-course', status: 'published', order: 2, createdBy: admin._id });
+    await Enrollment.create({ student: student._id, course: empty._id });
     const res = await req('GET', `/progress/course/${id(empty)}`, { as: student });
 
     assert.equal(res.status, 200);
@@ -195,6 +198,7 @@ describe('my learning', () => {
 
   it('drops a course from the list once it is no longer published', async () => {
     const temp = await Course.create({ title: 'Temp Course', slug: 'temp-course', status: 'published', order: 3, createdBy: admin._id });
+    await Enrollment.create({ student: student._id, course: temp._id });
     const tempModule = await Module.create({ course: temp._id, title: 'M', slug: 'm', status: 'published', order: 1, createdBy: admin._id });
     const tempTopic = await Topic.create({ module: tempModule._id, title: 'T', slug: 't', status: 'published', order: 1, createdBy: admin._id });
     const tempConcept = await Concept.create({ topic: tempTopic._id, title: 'C', slug: 'c', status: 'published', order: 1, createdBy: admin._id });

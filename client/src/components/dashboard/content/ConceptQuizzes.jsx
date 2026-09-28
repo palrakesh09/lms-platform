@@ -3,7 +3,7 @@ import { Link } from 'react-router';
 import { REQUEST_STATUS, useApiResource } from '../../../hooks/useApiResource.js';
 import { getQuizzesForConcept } from '../../../services/quizService.js';
 import ApiErrorState from '../../common/ApiErrorState.jsx';
-import { secondaryButton, smallButton, smallDangerButton } from '../../common/buttonClasses.js';
+import { smallButton, smallDangerButton } from '../../common/buttonClasses.js';
 import Icon from '../../common/Icon.jsx';
 import Skeleton, { LoadingRegion } from '../../common/Skeleton.jsx';
 import StatusBadge from '../../common/StatusBadge.jsx';

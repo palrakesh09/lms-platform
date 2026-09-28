@@ -1,6 +1,8 @@
 import { useAuth } from '../../hooks/useAuth.js';
 import { smallButton } from '../common/buttonClasses.js';
 import Icon from '../common/Icon.jsx';
+import SearchBar from '../search/SearchBar.jsx';
+import NotificationBell from '../notifications/NotificationBell.jsx';
 
 export default function DashboardTopbar({ area, drawerOpen, onMenu, menuRef }) {
   const { user, logout } = useAuth();
@@ -23,6 +25,8 @@ export default function DashboardTopbar({ area, drawerOpen, onMenu, menuRef }) {
       </div>
 
       <div className="flex items-center gap-3">
+        <SearchBar />
+        <NotificationBell />
         <span className="hidden max-w-\[12rem\] truncate text-sm text-slate-600 sm:inline">{user.name}</span>
         <button type="button" onClick={logout} className={smallButton}>
           Log out

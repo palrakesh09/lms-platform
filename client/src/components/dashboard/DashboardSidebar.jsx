@@ -7,10 +7,17 @@ const NAV = {
     { label: 'Dashboard', to: '/admin', icon: 'layout', end: true },
     { label: 'Courses', to: '/admin/courses', icon: 'book' },
     { label: 'Users', to: '/admin/users', icon: 'users' },
+    { label: 'Analytics', to: '/admin/analytics', icon: 'chart' },
+    { label: 'Enrollments', to: '/admin/enrollments', icon: 'clipboard' },
+    { label: 'Announcements', to: '/admin/announcements', icon: 'megaphone' },
+    { label: 'Notifications', to: '/admin/notifications', icon: 'bell' },
   ],
   mentor: [
     { label: 'Dashboard', to: '/mentor', icon: 'layout', end: true },
     { label: 'My Courses', to: '/mentor/courses', icon: 'book' },
+    { label: 'Analytics', to: '/mentor/analytics', icon: 'chart' }, // NEW
+    { label: 'Announcements', to: '/mentor/announcements', icon: 'megaphone' },
+    { label: 'Notifications', to: '/mentor/notifications', icon: 'bell' },
   ],
 };
 

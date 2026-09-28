@@ -66,7 +66,7 @@ const validationCases = [
     label: 'Course: bad slug, level, thumbnail and title',
     Model: Course,
     data: {
-      title: 'x',
+      title: '',
       slug: 'Not A Slug!',
       level: 'expert',
       thumbnail: 'javascript:alert(1)',
@@ -152,10 +152,10 @@ const validationCases = [
     invalid: ['type', 'url'],
   },
   {
-    label: 'Resource: missing URL',
+    label: 'Resource: content without URL',
     Model: Resource,
     data: { concept: id(), type: 'theory', title: 'Sample Resource', ...audit() },
-    invalid: ['url'],
+    invalid: [],
   },
   {
     label: 'Progress: valid input',
@@ -190,7 +190,7 @@ const main = async () => {
   await connectDB();
 
   console.log('\n-- Models and indexes --');
-  const modelList = Object.values(models);
+  const modelList = Object.values(models).filter((value) => value?.modelName);
   await Promise.all(modelList.map((Model) => Model.init())); // creates collections and builds indexes
   console.log(`Collections: ${modelList.map((Model) => Model.collection.name).join(', ')}`);
 

@@ -17,7 +17,7 @@ const ATTACHMENT_MODEL_BY_LEVEL = {
 
 const quizSchema = new Schema(
   {
-    title: titleField(),
+    title: titleField(1),
     slug: slugField(),
     description: textField('Description', 2000),
     instructions: textField('Instructions', 2000),
@@ -52,9 +52,8 @@ const quizSchema = new Schema(
   { timestamps: true },
 );
 
-quizSchema.pre('validate', function setAttachmentModel(next) {
+quizSchema.pre('validate', function setAttachmentModel() {
   this.attachmentModel = ATTACHMENT_MODEL_BY_LEVEL[this.attachmentLevel];
-  next();
 });
 
 quizSchema.index({ course: 1, slug: 1 }, { unique: true });

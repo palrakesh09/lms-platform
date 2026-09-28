@@ -14,8 +14,22 @@ import rbacCheckRoutes from './rbacCheck.routes.js';
 import resourceRoutes from './resource.routes.js';
 import topicRoutes from './topic.routes.js';
 import userRoutes from './user.routes.js';
+import analyticsRoutes from './analytics.routes.js';
+import enrollmentRoutes from './enrollment.routes.js';
+import searchRoutes from './search.routes.js';
+import activityRoutes from './activity.routes.js';
+import announcementRoutes from './announcement.routes.js';
+import notificationRoutes from './notification.routes.js';
 
 const router = Router();
+
+router.use('/notifications', notificationRoutes);
+router.use('/announcements', announcementRoutes);
+router.use('/activity', activityRoutes);
+
+router.use('/analytics', analyticsRoutes);
+router.use('/enrollments', enrollmentRoutes);
+router.use('/search', searchRoutes);
 
 router.use('/health', healthRoutes);
 router.use('/auth', authRoutes);

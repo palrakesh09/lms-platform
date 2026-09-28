@@ -3,6 +3,7 @@ import * as courseService from '../services/course.service.js';
 import { getCourseStructure } from '../services/structure.service.js';
 import { sendSuccess } from '../utils/apiResponse.js';
 import { toCourse } from '../utils/serializers.js';
+import * as events from '../services/notification.events.js';
 
 // By the time these run, requireCourseAccess has authorized the request and set req.content.
 
@@ -33,7 +34,9 @@ export const update = async (req, res) => {
 };
 
 export const publish = async (req, res) => {
+  const wasPublished = req.content.node.status === CONTENT_STATUS.PUBLISHED; // loaded BEFORE the update
   const course = await courseService.setCourseStatus(req.content.node._id, CONTENT_STATUS.PUBLISHED, req.user);
+  if (!wasPublished) await events.coursePublished(course);
 
   sendSuccess(res, { message: 'Course published successfully', data: toCourse(course, req.user) });
 };

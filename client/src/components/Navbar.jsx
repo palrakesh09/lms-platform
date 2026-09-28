@@ -2,6 +2,8 @@ import { Link, NavLink } from 'react-router';
 import { AUTH_STATUS } from '../context/AuthContext.jsx';
 import { useAuth } from '../hooks/useAuth.js';
 import { getDashboardPath, hasRole, ROLES } from '../utils/roles.js';
+import SearchBar from './search/SearchBar.jsx';
+import NotificationBell from './notifications/NotificationBell.jsx';
 
 const navLinkClass = ({ isActive }) =>
   `rounded-md px-3 py-2 text-sm font-medium transition-colors ${
@@ -19,6 +21,8 @@ export default function Navbar({ fluid = false }) {
           LMS Platform
         </Link>
 
+        {status === AUTH_STATUS.AUTHENTICATED && <div className="mx-3 flex flex-1 justify-center"><SearchBar /></div>}
+        
         <div className="flex items-center gap-1">
           <NavLink to="/" end className={navLinkClass}>
             Home
@@ -34,6 +38,11 @@ export default function Navbar({ fluid = false }) {
                   My Learning
                 </NavLink>
               )}
+              {hasRole(user, [ROLES.STUDENT]) && (
+                <NavLink to="/activity" className={navLinkClass}>
+                  Activity
+                </NavLink>
+              )}
               {dashboardPath && (
                 <NavLink to={dashboardPath} className={navLinkClass}>
                   Dashboard
@@ -42,6 +51,7 @@ export default function Navbar({ fluid = false }) {
               <NavLink to="/account" className={navLinkClass}>
                 <span className="inline-block max-w-\[10rem\] truncate align-bottom">{user.name}</span>
               </NavLink>
+              <NotificationBell />
               <button
                 type="button"
                 onClick={logout}

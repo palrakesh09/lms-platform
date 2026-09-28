@@ -12,7 +12,7 @@ import {
 const moduleSchema = new mongoose.Schema(
   {
     course: requiredRef('Course'),
-    title: titleField(),
+    title: titleField(1),
     slug: slugField(),
     description: textField('Description', 2000),
     order: orderField(),

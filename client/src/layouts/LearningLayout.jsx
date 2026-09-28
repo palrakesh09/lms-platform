@@ -1,48 +1,76 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Outlet, useMatch, useParams } from 'react-router';
-import ApiErrorState from '../components/common/ApiErrorState.jsx';
-import ErrorBoundary from '../components/common/ErrorBoundary.jsx';
-import Icon from '../components/common/Icon.jsx';
-import SkipLink from '../components/common/SkipLink.jsx';
-import ContentSkeleton from '../components/learning/ContentSkeleton.jsx';
-import CourseSidebar from '../components/learning/CourseSidebar.jsx';
-import SidebarSkeleton from '../components/learning/SidebarSkeleton.jsx';
-import Navbar from '../components/Navbar.jsx';
-import { REQUEST_STATUS } from '../hooks/useApiResource.js';
-import { useCourseProgress } from '../hooks/useCourseProgress.js';
-import { useCourseStructure } from '../hooks/useCourseStructure.js';
-import { flattenResources, findEntry } from '../utils/courseStructure.js';
-import { ROUTES } from '../utils/paths.js';
-import { toProgressMap } from '../utils/progress.js';
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { Outlet, useMatch, useParams, Link } from "react-router";
+import ApiErrorState from "../components/common/ApiErrorState.jsx";
+import ErrorBoundary from "../components/common/ErrorBoundary.jsx";
+import Icon from "../components/common/Icon.jsx";
+import SkipLink from "../components/common/SkipLink.jsx";
+import ContentSkeleton from "../components/learning/ContentSkeleton.jsx";
+import CourseSidebar from "../components/learning/CourseSidebar.jsx";
+import SidebarSkeleton from "../components/learning/SidebarSkeleton.jsx";
+import Navbar from "../components/Navbar.jsx";
+import { REQUEST_STATUS } from "../hooks/useApiResource.js";
+import { useCourseProgress } from "../hooks/useCourseProgress.js";
+import { useCourseStructure } from "../hooks/useCourseStructure.js";
+import { flattenResources, findEntry } from "../utils/courseStructure.js";
+import { ROUTES } from "../utils/paths.js";
+import { toProgressMap } from "../utils/progress.js";
+import { getErrorInfo } from "../utils/getErrorInfo.js";
+import EnrollButton from "../components/courses/EnrollButton.jsx";
+import { secondaryButton } from "../components/common/buttonClasses.js";
 
-const EMPTY_PROGRESS = { conceptProgress: [], summary: null, lastAccessed: null };
+const EMPTY_PROGRESS = {
+  conceptProgress: [],
+  summary: null,
+  lastAccessed: null,
+};
 
 // App shell: the sidebar and the content scroll independently.
 // Structure and progress are fetched ONCE here. This layout stays mounted while :resourceId changes,
 // so switching resources — and marking a concept complete/incomplete — never re-fetches either one.
 export default function LearningLayout() {
   const { courseId } = useParams();
-  const resourceMatch = useMatch('/learn/:courseId/resource/:resourceId');
+  const resourceMatch = useMatch("/learn/:courseId/resource/:resourceId");
   const activeResourceId = resourceMatch?.params.resourceId ?? null; // the URL decides what is selected
 
-  const { status: structureStatus, data: structure, error: structureError, reload: reloadStructure } = useCourseStructure(courseId);
+  const {
+    status: structureStatus,
+    data: structure,
+    error: structureError,
+    reload: reloadStructure,
+  } = useCourseStructure(courseId);
   const progressQuery = useCourseProgress(courseId);
 
   const entries = useMemo(() => flattenResources(structure), [structure]);
-  const activeEntry = useMemo(() => findEntry(entries, activeResourceId), [entries, activeResourceId]);
+  const activeEntry = useMemo(
+    () => findEntry(entries, activeResourceId),
+    [entries, activeResourceId],
+  );
 
   // A progress-fetch hiccup should never block reading: fall back to "no progress data" rather than
   // showing a full-page error when the structure itself loaded fine.
-  const progressData = progressQuery.status === REQUEST_STATUS.SUCCESS ? progressQuery.data : EMPTY_PROGRESS;
-  const progressMap = useMemo(() => toProgressMap(progressData.conceptProgress), [progressData]);
+  const progressData =
+    progressQuery.status === REQUEST_STATUS.SUCCESS
+      ? progressQuery.data
+      : EMPTY_PROGRESS;
+  const progressMap = useMemo(
+    () => toProgressMap(progressData.conceptProgress),
+    [progressData],
+  );
 
   const setConceptCompletion = useCallback(
     (updatedRow) => {
       progressQuery.mutate((current) => {
         if (!current) return current;
-        const conceptProgress = [...current.conceptProgress.filter((row) => row.conceptId !== updatedRow.conceptId), updatedRow];
+        const conceptProgress = [
+          ...current.conceptProgress.filter(
+            (row) => row.conceptId !== updatedRow.conceptId,
+          ),
+          updatedRow,
+        ];
         const totalConcepts = current.summary.totalConcepts;
-        const completedConcepts = conceptProgress.filter((row) => row.completed).length;
+        const completedConcepts = conceptProgress.filter(
+          (row) => row.completed,
+        ).length;
 
         return {
           ...current,
@@ -51,7 +79,10 @@ export default function LearningLayout() {
             totalConcepts,
             completedConcepts,
             remainingConcepts: totalConcepts - completedConcepts,
-            percentage: totalConcepts === 0 ? 0 : Math.round((completedConcepts / totalConcepts) * 1000) / 10,
+            percentage:
+              totalConcepts === 0
+                ? 0
+                : Math.round((completedConcepts / totalConcepts) * 1000) / 10,
           },
         };
       });
@@ -64,10 +95,21 @@ export default function LearningLayout() {
       courseId,
       structure,
       entries,
-      progress: { map: progressMap, summary: progressData.summary, lastAccessed: progressData.lastAccessed },
+      progress: {
+        map: progressMap,
+        summary: progressData.summary,
+        lastAccessed: progressData.lastAccessed,
+      },
       setConceptCompletion,
     }),
-    [courseId, structure, entries, progressMap, progressData, setConceptCompletion],
+    [
+      courseId,
+      structure,
+      entries,
+      progressMap,
+      progressData,
+      setConceptCompletion,
+    ],
   );
 
   const [drawerOpen, setDrawerOpen] = useState(false);
@@ -80,13 +122,13 @@ export default function LearningLayout() {
 
     closeButtonRef.current?.focus();
     const handleKeyDown = (event) => {
-      if (event.key === 'Escape') {
+      if (event.key === "Escape") {
         setDrawerOpen(false);
         menuButtonRef.current?.focus();
       }
     };
-    document.addEventListener('keydown', handleKeyDown);
-    return () => document.removeEventListener('keydown', handleKeyDown);
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
   }, [drawerOpen]);
 
   const handleNavigate = useCallback(() => {
@@ -103,7 +145,9 @@ export default function LearningLayout() {
   // Ready once the structure has loaded AND the progress request has settled (success or error) — a
   // progress hiccup is never a permanent block, but the resume redirect below must not fire before
   // progress data is actually available.
-  const ready = structureStatus === REQUEST_STATUS.SUCCESS && progressQuery.status !== REQUEST_STATUS.LOADING;
+  const ready =
+    structureStatus === REQUEST_STATUS.SUCCESS &&
+    progressQuery.status !== REQUEST_STATUS.LOADING;
 
   return (
     <div className="flex h-dvh flex-col overflow-hidden bg-slate-50 text-slate-900">
@@ -138,7 +182,7 @@ export default function LearningLayout() {
         <aside
           id="course-sidebar"
           className={`fixed inset-y-0 left-0 z-40 flex w-80 max-w-[85vw] flex-col border-r border-slate-200 bg-white transition-transform motion-reduce:transition-none lg:static lg:z-auto lg:visible lg:w-80 lg:max-w-none lg:shrink-0 lg:translate-x-0 ${
-            drawerOpen ? 'translate-x-0' : 'invisible -translate-x-full'
+            drawerOpen ? "translate-x-0" : "invisible -translate-x-full"
           }`}
         >
           <div className="flex shrink-0 items-center justify-between border-b border-slate-200 px-4 py-3 lg:hidden">
@@ -154,8 +198,42 @@ export default function LearningLayout() {
             </button>
           </div>
 
-          {!ready && structureStatus !== REQUEST_STATUS.ERROR && <SidebarSkeleton />}
-          {structureStatus === REQUEST_STATUS.ERROR && <p className="p-4 text-sm text-slate-600">Course content is unavailable right now.</p>}
+          {!ready && structureStatus !== REQUEST_STATUS.ERROR && (
+            <SidebarSkeleton />
+          )}
+          {structureStatus === REQUEST_STATUS.ERROR &&
+            (getErrorInfo(structureError, "course").kind === "forbidden" ? (
+              <div className="mx-auto max-w-md rounded-xl border border-slate-200 bg-white px-6 py-10 text-center shadow-sm">
+                <h2 className="text-lg font-semibold text-slate-900">
+                  Enrollment required
+                </h2>
+                <p className="mt-1 text-sm text-slate-600">
+                  You need to enroll in this course to access its content.
+                </p>
+                <div className="mt-5 flex justify-center gap-3">
+                  <Link
+                    to={ROUTES.course(courseId)}
+                    className={secondaryButton}
+                  >
+                    Back to Course
+                  </Link>
+                  <EnrollButton
+                    courseId={courseId}
+                    status={null}
+                    courseStatus="published"
+                    onEnrolled={reloadStructure}
+                  />
+                </div>
+              </div>
+            ) : (
+              <ApiErrorState
+                error={structureError}
+                subject="course"
+                onRetry={reloadStructure}
+                backTo={ROUTES.courses}
+                backLabel="Back to courses"
+              />
+            ))}
           {ready && (
             <CourseSidebar
               key={courseId}
@@ -169,12 +247,25 @@ export default function LearningLayout() {
           )}
         </aside>
 
-        <main id="main-content" ref={mainRef} tabIndex={-1} className="min-w-0 flex-1 overflow-y-auto focus:outline-none">
+        <main
+          id="main-content"
+          ref={mainRef}
+          tabIndex={-1}
+          className="min-w-0 flex-1 overflow-y-auto focus:outline-none"
+        >
           <div className="mx-auto w-full max-w-3xl px-4 py-6 sm:px-6 lg:py-10">
             <ErrorBoundary resetKey={activeResourceId}>
-              {!ready && structureStatus !== REQUEST_STATUS.ERROR && <ContentSkeleton />}
+              {!ready && structureStatus !== REQUEST_STATUS.ERROR && (
+                <ContentSkeleton />
+              )}
               {structureStatus === REQUEST_STATUS.ERROR && (
-                <ApiErrorState error={structureError} subject="course" onRetry={reloadStructure} backTo={ROUTES.courses} backLabel="Back to courses" />
+                <ApiErrorState
+                  error={structureError}
+                  subject="course"
+                  onRetry={reloadStructure}
+                  backTo={ROUTES.courses}
+                  backLabel="Back to courses"
+                />
               )}
               {ready && <Outlet context={outletContext} />}
             </ErrorBoundary>

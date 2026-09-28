@@ -1,7 +1,7 @@
 import { after, before, describe, it } from 'node:test';
 import assert from 'node:assert/strict';
 import { seedFixtures, startApi } from './helpers/apiKit.js';
-import { Course, Module, Progress, Topic } from '../src/models/index.js';
+import { Course, Enrollment, Module, Progress, Topic } from '../src/models/index.js';
 
 const MISSING_ID = '0'.repeat(24); // well-formed, but nothing has it
 const id = (doc) => String(doc._id);
@@ -16,6 +16,7 @@ before(async () => {
   api = await startApi();
   ({ admin, mentorA, mentorB, student } = api.users);
   f = await seedFixtures(api.users);
+  await Enrollment.create({ student: student._id, course: f.pub._id });
 });
 after(() => api?.stop());
 

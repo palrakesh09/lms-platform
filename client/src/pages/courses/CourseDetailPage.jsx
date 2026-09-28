@@ -1,21 +1,23 @@
-import { Link, useParams } from 'react-router';
-import ApiErrorState from '../../components/common/ApiErrorState.jsx';
-import { primaryButton } from '../../components/common/buttonClasses.js';
-import Icon from '../../components/common/Icon.jsx';
-import ProgressBar from '../../components/common/ProgressBar.jsx';
-import Skeleton, { LoadingRegion } from '../../components/common/Skeleton.jsx';
-import CourseBadges from '../../components/courses/CourseBadges.jsx';
-import CourseOutline from '../../components/courses/CourseOutline.jsx';
-import CourseThumbnail from '../../components/courses/CourseThumbnail.jsx';
-import { REQUEST_STATUS } from '../../hooks/useApiResource.js';
-import { useAuth } from '../../hooks/useAuth.js';
-import { useCourse } from '../../hooks/useCourse.js';
-import { useCourseProgress } from '../../hooks/useCourseProgress.js';
-import { useCourseStructure } from '../../hooks/useCourseStructure.js';
-import { countStructure } from '../../utils/courseStructure.js';
-import { pluralize } from '../../utils/formatters.js';
-import { ROUTES } from '../../utils/paths.js';
-import { hasRole, ROLES } from '../../utils/roles.js';
+import { Link, useParams } from "react-router";
+import ApiErrorState from "../../components/common/ApiErrorState.jsx";
+import { primaryButton } from "../../components/common/buttonClasses.js";
+import Icon from "../../components/common/Icon.jsx";
+import ProgressBar from "../../components/common/ProgressBar.jsx";
+import Skeleton, { LoadingRegion } from "../../components/common/Skeleton.jsx";
+import CourseBadges from "../../components/courses/CourseBadges.jsx";
+import CourseOutline from "../../components/courses/CourseOutline.jsx";
+import CourseThumbnail from "../../components/courses/CourseThumbnail.jsx";
+import { REQUEST_STATUS } from "../../hooks/useApiResource.js";
+import { useAuth } from "../../hooks/useAuth.js";
+import { useCourse } from "../../hooks/useCourse.js";
+import { useCourseProgress } from "../../hooks/useCourseProgress.js";
+import { useCourseStructure } from "../../hooks/useCourseStructure.js";
+import { countStructure } from "../../utils/courseStructure.js";
+import { pluralize } from "../../utils/formatters.js";
+import { ROUTES } from "../../utils/paths.js";
+import { hasRole, ROLES } from "../../utils/roles.js";
+import EnrollButton from "../../components/courses/EnrollButton.jsx";
+import { useEnrollment } from "../../hooks/useEnrollment.js";
 
 function CourseDetailSkeleton() {
   return (
@@ -51,21 +53,37 @@ function StudentProgress({ courseId }) {
     );
   }
   if (status === REQUEST_STATUS.ERROR) {
-    return <ApiErrorState error={error} subject="your progress" onRetry={reload} />;
+    return (
+      <ApiErrorState error={error} subject="your progress" onRetry={reload} />
+    );
   }
 
   const hasStarted = data.conceptProgress.length > 0;
-  const isComplete = data.summary.totalConcepts > 0 && data.summary.completedConcepts === data.summary.totalConcepts;
-  const target = data.lastAccessed?.resourceId ? ROUTES.learn(courseId, data.lastAccessed.resourceId) : ROUTES.learn(courseId);
+  const isComplete =
+    data.summary.totalConcepts > 0 &&
+    data.summary.completedConcepts === data.summary.totalConcepts;
+  const target = data.lastAccessed?.resourceId
+    ? ROUTES.learn(courseId, data.lastAccessed.resourceId)
+    : ROUTES.learn(courseId);
 
   return (
     <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
-      <h2 className="text-sm font-semibold text-slate-900">{isComplete ? 'Course completed' : 'Your progress'}</h2>
+      <h2 className="text-sm font-semibold text-slate-900">
+        {isComplete ? "Course completed" : "Your progress"}
+      </h2>
       <div className="mt-2">
-        <ProgressBar completed={data.summary.completedConcepts} total={data.summary.totalConcepts} label="Your progress" />
+        <ProgressBar
+          completed={data.summary.completedConcepts}
+          total={data.summary.totalConcepts}
+          label="Your progress"
+        />
       </div>
       <Link to={target} className={`${primaryButton} mt-4`}>
-        {isComplete ? 'Review course' : hasStarted ? 'Continue Learning' : 'Start Learning'}
+        {isComplete
+          ? "Review course"
+          : hasStarted
+            ? "Continue Learning"
+            : "Start Learning"}
       </Link>
     </div>
   );
@@ -76,18 +94,29 @@ export default function CourseDetailPage() {
   const { user } = useAuth();
   const course = useCourse(courseId);
   const structure = useCourseStructure(courseId);
+  const enrollment = useEnrollment(courseId);
   const isStudent = hasRole(user, [ROLES.STUDENT]);
 
   if (course.status === REQUEST_STATUS.LOADING) {
     return <CourseDetailSkeleton />;
   }
   if (course.status === REQUEST_STATUS.ERROR) {
-    return <ApiErrorState error={course.error} subject="course" onRetry={course.reload} backTo={ROUTES.courses} backLabel="Back to courses" />;
+    return (
+      <ApiErrorState
+        error={course.error}
+        subject="course"
+        onRetry={course.reload}
+        backTo={ROUTES.courses}
+        backLabel="Back to courses"
+      />
+    );
   }
 
   const { data: courseData } = course;
-  const counts = structure.status === REQUEST_STATUS.SUCCESS ? countStructure(structure.data) : null;
-
+  const counts =
+    structure.status === REQUEST_STATUS.SUCCESS
+      ? countStructure(structure.data)
+      : null;
   return (
     <div className="space-y-10">
       <div>
@@ -100,33 +129,62 @@ export default function CourseDetailPage() {
         </Link>
 
         <div className="mt-4 grid gap-6 md:grid-cols-[18rem_1fr]">
-          <CourseThumbnail src={courseData.thumbnail} className="rounded-xl border border-slate-200" />
+          <CourseThumbnail
+            src={courseData.thumbnail}
+            className="rounded-xl border border-slate-200"
+          />
 
           <div>
             <CourseBadges course={courseData} />
-            <h1 className="mt-3 wrap-break-word text-3xl font-bold tracking-tight">{courseData.title}</h1>
+            <h1 className="mt-3 wrap-break-word text-3xl font-bold tracking-tight">
+              {courseData.title}
+            </h1>
 
             {courseData.description || courseData.shortDescription ? (
               <p className="mt-3 max-w-2xl whitespace-pre-line wrap-break-word leading-relaxed text-slate-700">
                 {courseData.description || courseData.shortDescription}
               </p>
             ) : (
-              <p className="mt-3 text-sm italic text-slate-600">No description available yet.</p>
+              <p className="mt-3 text-sm italic text-slate-600">
+                No description available yet.
+              </p>
             )}
 
             {counts && (
               <p className="mt-3 text-sm text-slate-600">
-                {[pluralize(counts.modules, 'module'), pluralize(counts.topics, 'topic'), pluralize(counts.concepts, 'concept'), pluralize(counts.resources, 'resource')].join(' · ')}
+                {[
+                  pluralize(counts.modules, "module"),
+                  pluralize(counts.topics, "topic"),
+                  pluralize(counts.concepts, "concept"),
+                  pluralize(counts.resources, "resource"),
+                ].join(" · ")}
               </p>
             )}
 
             <div className="mt-6 max-w-xs">
               {isStudent ? (
-                <StudentProgress courseId={courseData.id} />
+                enrollment.status === REQUEST_STATUS.LOADING ? (
+                  <Skeleton className="h-24 w-full" />
+                ) : enrollment.data?.status === "active" ||
+                  enrollment.data?.status === "completed" ? (
+                  <StudentProgress
+                    courseId={courseData.id}
+                    enrollmentStatus={enrollment.data.status}
+                  />
+                ) : (
+                  <EnrollButton
+                    courseId={courseData.id}
+                    status={enrollment.data?.status ?? null}
+                    courseStatus={courseData.status}
+                    onEnrolled={enrollment.reload}
+                  />
+                )
               ) : (
-                <Link to={ROUTES.learn(courseData.id)} className={primaryButton}>
-                  Start Learning
-                </Link>
+                <EnrollButton
+                  courseId={courseData.id}
+                  status={null}
+                  courseStatus={courseData.status}
+                />
               )}
             </div>
           </div>
@@ -145,8 +203,16 @@ export default function CourseDetailPage() {
             ))}
           </LoadingRegion>
         )}
-        {structure.status === REQUEST_STATUS.ERROR && <ApiErrorState error={structure.error} subject="course content" onRetry={structure.reload} />}
-        {structure.status === REQUEST_STATUS.SUCCESS && <CourseOutline modules={structure.data.modules ?? []} />}
+        {structure.status === REQUEST_STATUS.ERROR && (
+          <ApiErrorState
+            error={structure.error}
+            subject="course content"
+            onRetry={structure.reload}
+          />
+        )}
+        {structure.status === REQUEST_STATUS.SUCCESS && (
+          <CourseOutline modules={structure.data.modules ?? []} />
+        )}
       </section>
     </div>
   );

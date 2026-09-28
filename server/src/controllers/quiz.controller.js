@@ -1,6 +1,7 @@
 import * as quizService from '../services/quiz.service.js';
 import { sendSuccess } from '../utils/apiResponse.js';
 import { toQuiz } from '../utils/quizSerializers.js';
+import * as events from '../services/notification.events.js';
 
 export const list = async (req, res) => {
   const { items, pagination } = await quizService.listQuizzes(req.validatedQuery, req.user);
@@ -22,6 +23,7 @@ export const update = async (req, res) => {
 
 export const publish = async (req, res) => {
   const quiz = await quizService.setQuizStatus(req.quiz._id, 'published', req.user);
+  if (req.quiz.status !== 'published') await events.quizPublished(quiz, req.quizContext); // req.quiz is the pre-update document
   sendSuccess(res, { message: 'Quiz published successfully', data: toQuiz(quiz, req.user) });
 };
 

@@ -6,11 +6,11 @@ const { Schema } = mongoose;
 
 const MAX_URL_LENGTH = 2048;
 
-export const titleField = () => ({
+export const titleField = (minlength = 2) => ({
   type: String,
   required: [true, 'Title is required'],
   trim: true,
-  minlength: [2, 'Title must be at least 2 characters'],
+  minlength: [minlength, `Title must be at least ${minlength} characters`],
   maxlength: [150, 'Title cannot exceed 150 characters'],
 });
 

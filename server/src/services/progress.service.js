@@ -1,3 +1,4 @@
+import mongoose from 'mongoose';
 import { CONTENT_STATUS } from '../constants/lms.js';
 import Course from '../models/Course.js';
 import Progress from '../models/Progress.js';
@@ -5,6 +6,9 @@ import Resource from '../models/Resource.js';
 import { ApiError } from '../utils/ApiError.js';
 import { loadContentChain } from './contentAccess.service.js';
 import { getPublishedConceptIds } from './structure.service.js';
+import { applyCompletionIfEligible } from './enrollment.service.js';
+import * as events from './notification.events.js';
+
 
 const round1 = (value) => Math.round(value * 10) / 10;
 
@@ -53,14 +57,31 @@ export const getConceptProgress = async (studentId, conceptId) => {
 // `courseId` is req.content.course._id — the concept's OWN verified course, resolved by
 // requireCourseAccess from the concept itself. It is never a value the client could substitute,
 // so a concept can never be recorded against the wrong course.
-export const setConceptCompletion = (studentId, conceptId, courseId, completed) =>
-  upsertProgress(
+export const setConceptCompletion = async (studentId, conceptId, courseId, completed) => {
+  const result = await upsertProgress(
     { student: studentId, concept: conceptId },
     {
       $set: { completed, completedAt: completed ? new Date() : null, lastAccessedAt: new Date(), course: courseId },
       $setOnInsert: { student: studentId, concept: conceptId },
     },
   );
+
+  // Server-triggered ONLY: the client never asks for this, it is a side effect of marking a concept
+  // complete/incomplete. Re-derives totals fresh each time rather than trusting any cached count.
+  const publishedIds = await getPublishedConceptIds(courseId);
+  const completedCount = await countCompletedAmong(studentId, publishedIds);
+  const becameCompleted = await applyCompletionIfEligible(studentId, courseId, { completedConcepts: completedCount, totalConcepts: publishedIds.length });
+  if (completed) await events.conceptCompleted(studentId, conceptId, courseId); // once per concept (dedupeKey)
+  if (becameCompleted) await events.courseCompleted(studentId, courseId); // only on the transition
+
+  return result;
+};
+
+// helper — put alongside the other private helpers in this file
+const countCompletedAmong = (studentId, conceptIds) =>
+  Progress.countDocuments({ student: studentId, concept: { $in: conceptIds }, completed: true });
+
+  
 
 // Records that the student opened `resourceId` under `conceptId` inside `courseId`. Every relationship
 // is re-verified against the database — none of the three ids are trusted just because they arrived
@@ -84,13 +105,15 @@ export const recordAccess = async (studentId, courseId, conceptId, resourceId) =
     throw new ApiError(404, 'Resource not found');
   }
 
-  return upsertProgress(
+  const result = await upsertProgress(
     { student: studentId, concept: conceptId },
     {
       $set: { lastAccessedAt: new Date(), lastAccessedResource: resourceId, course: courseId },
-      $setOnInsert: { student: studentId, concept: conceptId, completed: false },
+      $setOnInsert: { student: studentId, concept: conceptId },
     },
   );
+  await events.resourceViewed(studentId, courseId, conceptId, resourceId); // at most one row per resource per day
+  return result;
 };
 
 // `course` is the lean document requireCourseAccess already loaded and authorized for this student.
@@ -129,7 +152,7 @@ export const getCourseProgressSummary = async (studentId, course) => {
 // content the student can no longer open.
 export const getMyLearning = async (studentId) => {
   const grouped = await Progress.aggregate([
-    { $match: { student: studentId } },
+    { $match: { student: new mongoose.Types.ObjectId(String(studentId)) } },
     { $sort: { lastAccessedAt: -1 } },
     {
       $group: {

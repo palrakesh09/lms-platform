@@ -1,8 +1,8 @@
 // Small inline icon set (24x24 outline paths in the style of the Lucide icons), so no icon library is needed.
 // Icons are decorative: the surrounding text always carries the meaning.
 const ICONS = {
-  'chevron-right': <path d="m9 18 6-6-6-6" />,
-  'arrow-left': (
+  "chevron-right": <path d="m9 18 6-6-6-6" />,
+  "arrow-left": (
     <>
       <path d="m12 19-7-7 7-7" />
       <path d="M19 12H5" />
@@ -48,7 +48,7 @@ const ICONS = {
       <path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5" />
     </>
   ),
-  'external-link': (
+  "external-link": (
     <>
       <path d="M15 3h6v6" />
       <path d="M10 14 21 3" />
@@ -74,7 +74,7 @@ const ICONS = {
       <path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z" />
     </>
   ),
-    plus: (
+  plus: (
     <>
       <path d="M5 12h14" />
       <path d="M12 5v14" />
@@ -109,9 +109,19 @@ const ICONS = {
       <path d="M16 3.13a4 4 0 0 1 0 7.75" />
     </>
   ),
+  chart: (
+    <>
+      <path d="M3 3v18h18" />
+      <path d="M18 17V9" />
+      <path d="M13 17V5" />
+      <path d="M8 17v-3" />
+    </>
+  ),
+  bell: (<><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9" /><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0" /></>),
+  megaphone: (<><path d="m3 11 18-5v12L3 14v-3z" /><path d="M11.6 16.8a3 3 0 1 1-5.8-1.6" /></>),
 };
 
-export default function Icon({ name, className = 'size-5', ...rest }) {
+export default function Icon({ name, className = "size-5", ...rest }) {
   return (
     <svg
       viewBox="0 0 24 24"

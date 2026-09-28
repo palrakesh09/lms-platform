@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useForm } from '../../../hooks/useForm.js';
 import { buildQuestionPayload, emptyQuestionValues, questionToFormValues, validateQuestionForm } from '../../../utils/forms/questionForm.js';
 import { createQuestion, updateQuestion } from '../../../services/questionService.js';
-import { primaryButton, secondaryButton, smallDangerButton } from '../../common/buttonClasses.js';
+import { secondaryButton, smallDangerButton } from '../../common/buttonClasses.js';
 import { TextareaField, TextField } from '../../common/FormControls.jsx';
 import FormModal from '../../common/FormModal.jsx';
 import Icon from '../../common/Icon.jsx';

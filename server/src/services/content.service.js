@@ -119,10 +119,8 @@ export const conceptService = createContentService({
   ],
 });
 
-export const resourceService = createContentService({
-  Model: Resource,
-  label: 'resource',
-  parentLabel: 'concept',
-  parentField: 'concept',
-  filterFields: ['type'],
-});
+// Resources have their own service (not the generic factory) because of the Phase 12
+// "url or content required" business rule, which needs to inspect the merged document — see
+// resource.service.js. The exported shape is identical, so nothing that imports resourceService
+// from here (content.controller.js, resource.routes.js) needs to change.
+export * as resourceService from './resource.service.js';

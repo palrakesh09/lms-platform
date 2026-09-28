@@ -4,26 +4,20 @@ import { authenticate } from '../middleware/authenticate.js';
 import { authorize } from '../middleware/authorize.js';
 import { noStore } from '../middleware/noStore.js';
 import { requireCourseAccess } from '../middleware/requireCourseAccess.js';
+import { requireEnrollment } from '../middleware/requireEnrollment.js';
 import { validate, validateQuery } from '../middleware/validate.js';
 
 const { ADMIN, MENTOR } = ROLES;
 
-// Builds the two routers every content level needs.
-//
-//   nested  list + create under the parent:   GET|POST /<parents>/:parentId/<children>
-//           The parent route file mounts it. It inherits that router's `authenticate` (mounted first),
-//           and fails closed anyway: authorize and requireCourseAccess both answer 401 without req.user.
-//   router  item routes:                       GET|PATCH|DELETE /<children>/:id
-//
-// Middleware order is deliberate: authorize (role) → requireCourseAccess (ownership) → validate (body).
-// Unauthorized callers never see validation errors, and students never trigger a content lookup on writes.
-//
-//   parent  { entity, param } of the parent the URL supplies, e.g. { entity: 'module', param: 'moduleId' }
+// requireEnrollment is a no-op for admin/mentor (see its own file) and enforces enrollment for students
+// only. Added here — rather than per entity — closes it for modules, topics, concepts AND resources at
+// once: exactly what Phase 11 §5/§14 describe ("a concept from Course B", "a resourceId") but which the
+// original Phase 11 change missed for this shared factory.
 export const createContentRoutes = ({ controller, entity, parent, createSchema, updateSchema, listQuerySchema }) => {
   const nested = Router({ mergeParams: true });
   const listValidators = listQuerySchema ? [validateQuery(listQuerySchema)] : [];
 
-  nested.get('/', requireCourseAccess('read', parent), ...listValidators, controller.listByParent);
+  nested.get('/', requireCourseAccess('read', parent), requireEnrollment(), ...listValidators, controller.listByParent);
   nested.post(
     '/',
     authorize(ADMIN, MENTOR),
@@ -37,7 +31,7 @@ export const createContentRoutes = ({ controller, entity, parent, createSchema, 
 
   const access = (action) => requireCourseAccess(action, { entity, param: 'id' });
 
-  router.get('/:id', access('read'), controller.get);
+  router.get('/:id', access('read'), requireEnrollment(), controller.get);
   router.patch('/:id', authorize(ADMIN, MENTOR), access('manage'), validate(updateSchema), controller.update);
   router.delete('/:id', authorize(ADMIN, MENTOR), access('manage'), controller.remove);
 

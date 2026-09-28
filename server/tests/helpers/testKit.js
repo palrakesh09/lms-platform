@@ -7,7 +7,7 @@ import * as models from '../../src/models/index.js';
 import { signAccessToken } from '../../src/utils/token.js';
 
 const { User, Course, Module, Topic, Concept, Resource } = models;
-const modelList = Object.values(models);
+const modelList = Object.values(models).filter((value) => value?.modelName);
 
 const USER_ROLES = { admin: 'admin', mentorA: 'mentor', mentorB: 'mentor', student: 'student' };
 

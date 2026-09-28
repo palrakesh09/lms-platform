@@ -8,4 +8,6 @@ export const dashboardPaths = (area) => ({
   course: (courseId) => `/${area}/courses/${encode(courseId)}`,
   editCourse: (courseId) => `/${area}/courses/${encode(courseId)}/edit`,
   users: `/${area}/users`,
+  analytics: `/${area}/analytics`, // NEW
+  courseAnalytics: (courseId) => `/${area}/analytics/courses/${encode(courseId)}`, // NEW (mentor)
 });

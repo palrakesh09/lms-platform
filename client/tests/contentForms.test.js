@@ -44,6 +44,12 @@ describe('resource form', () => {
     assert.equal(validateResourceForm({ ...resource, url: 'javascript:alert(1)' }).url, 'Please enter a valid HTTP/HTTPS URL.');
   });
 
+  it('allows content-only resources and defaults missing content in the payload', () => {
+    const contentOnly = { ...resource, url: '', content: { version: 1, blocks: [{ type: 'paragraph', text: 'Lesson' }] } };
+    assert.deepEqual(validateResourceForm(contentOnly), {});
+    assert.deepEqual(buildResourcePayload(resource).content, { version: 1, blocks: [] });
+  });
+
   it('rejects an arbitrary type', () => {
     assert.ok(validateResourceForm({ ...resource, type: 'video' }).type);
   });

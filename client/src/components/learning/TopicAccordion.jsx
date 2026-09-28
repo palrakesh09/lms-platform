@@ -13,7 +13,7 @@ export default function TopicAccordion({ topic, index }) {
         level="topic"
         open={expanded.has(topic.id)}
         onToggle={() => toggle(topic.id)}
-        eyebrow={`Topic ${padNumber(index + 1)}`}
+        eyebrow={`Topic ${padNumber((topic._index ?? index) + 1)}`}
         title={topic.title}
       >
         {concepts.length === 0 ? (

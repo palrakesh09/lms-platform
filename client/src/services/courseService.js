@@ -46,3 +46,6 @@ export const getCourseMentors = async (courseId, signal) =>
 
 export const setCourseMentors = async (courseId, mentorIds) =>
   (await apiClient.patch(`/courses/${encode(courseId)}/mentors`, { mentorIds })).data.data;
+
+export const getEnrollmentStatuses = async (courseIds) =>
+  (await apiClient.post('/courses/enrollment-status', { courseIds })).data.data; // { [courseId]: status }

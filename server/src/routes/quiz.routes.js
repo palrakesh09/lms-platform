@@ -9,6 +9,7 @@ import { noStore } from '../middleware/noStore.js';
 import { requireQuizAccess } from '../middleware/requireQuizAccess.js';
 import { validate, validateQuery } from '../middleware/validate.js';
 import { createQuestionSchema, listQuizzesQuerySchema, submitQuizSchema, updateQuizSchema } from '../validators/quiz.validators.js';
+import { requireEnrollment } from '../middleware/requireEnrollment.js';
 
 const { ADMIN, MENTOR, STUDENT } = ROLES;
 
@@ -30,8 +31,8 @@ router.get('/:quizId/questions', quizAccess('read'), questionController.listByQu
 router.post('/:quizId/questions', authorize(ADMIN, MENTOR), quizAccess('manage'), validate(createQuestionSchema), questionController.create);
 
 // Attempts are student-only, and self-service only.
-router.post('/:quizId/start', authorize(STUDENT), quizAccess('read'), attemptController.start);
-router.post('/:quizId/submit', authorize(STUDENT), quizAccess('read'), validate(submitQuizSchema), attemptController.submit);
-router.get('/:quizId/attempts', authorize(STUDENT), quizAccess('read'), attemptController.listMine);
+router.post('/:quizId/start', authorize(STUDENT), quizAccess('read'), requireEnrollment({ source: 'quiz' }), attemptController.start);
+router.post('/:quizId/submit', authorize(STUDENT), quizAccess('read'), requireEnrollment({ source: 'quiz' }), validate(submitQuizSchema), attemptController.submit);
+router.get('/:quizId/attempts', authorize(STUDENT), quizAccess('read'), requireEnrollment({ source: 'quiz' }), attemptController.listMine);
 
 export default router;

@@ -1,8 +1,8 @@
-import { getSafeUrl } from '../../../utils/safeUrl.js';
-import Icon from '../../common/Icon.jsx';
-import StatusBadge from '../../common/StatusBadge.jsx';
-import ResourceTypeBadge from '../../learning/ResourceTypeBadge.jsx';
-import NodeActions from './NodeActions.jsx';
+import { getSafeUrl } from "../../../utils/safeUrl.js";
+import Icon from "../../common/Icon.jsx";
+import StatusBadge from "../../common/StatusBadge.jsx";
+import ResourceTypeBadge from "../../learning/ResourceTypeBadge.jsx";
+import NodeActions from "./NodeActions.jsx";
 
 export default function ResourceManager({ resource }) {
   const safeUrl = getSafeUrl(resource.url);
@@ -12,9 +12,16 @@ export default function ResourceManager({ resource }) {
       <ResourceTypeBadge type={resource.type} />
       <span className="min-w-0 flex-1 basis-48 wrap-break-word text-sm text-slate-900">
         {resource.title}
-        <span className="block text-xs text-slate-600">Order {resource.order}</span>
+        <span className="block text-xs text-slate-600">
+          Order {resource.order}
+        </span>
       </span>
-      <StatusBadge status={resource.status} />
+      <StatusBadge status={resource.status} />+{" "}
+      {(resource.content?.blocks?.length ?? 0) > 0 && (
+        <span className="rounded-full bg-indigo-50 px-2 py-0.5 text-xs font-medium text-indigo-700">
+          Rich content
+        </span>
+      )}
       {safeUrl ? (
         <a
           href={safeUrl}

@@ -13,7 +13,7 @@ export default function ModuleAccordion({ module, index }) {
         level="module"
         open={expanded.has(module.id)}
         onToggle={() => toggle(module.id)}
-        eyebrow={`Module ${padNumber(index + 1)}`}
+        eyebrow={`Module ${padNumber((module._index ?? index) + 1)}`}
         title={module.title}
       >
         {topics.length === 0 ? (

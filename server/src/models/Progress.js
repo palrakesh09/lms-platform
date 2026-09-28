@@ -37,7 +37,7 @@ const progressSchema = new mongoose.Schema(
 // Prevents duplicate progress rows, and is the lookup for one student + one concept.
 progressSchema.index({ student: 1, concept: 1 }, { unique: true });
 // A student's progress within a course, and their most recently accessed concept (resume learning).
-progressSchema.index({ student: 1, course: 1, lastAccessedAt: -1 });
+progressSchema.index({ student: 1, course: 1, completedAt: 1 });
 // "Does anyone have progress on this concept?" Used by the concept delete guard (Phase 5).
 progressSchema.index({ concept: 1 });
 

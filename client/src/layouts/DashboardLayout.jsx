@@ -23,7 +23,7 @@ export default function DashboardLayout({ area }) {
 
   return (
     <ToastProvider>
-      <div className="flex h-dvh overflow-hidden bg-slate-50 text-slate-900">
+      <div className="fixed inset-0 flex overflow-hidden bg-slate-50 text-slate-900">
         <SkipLink />
 
         {drawer.open && (

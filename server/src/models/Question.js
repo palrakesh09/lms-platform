@@ -57,14 +57,13 @@ const questionSchema = new Schema(
 // Cross-field rule: correctAnswer must name one of THIS question's own option ids. Runs on create and
 // on every .save() (including partial admin edits, since the service loads the full document first),
 // so a mismatched pair can never be persisted.
-questionSchema.pre('validate', function checkCorrectAnswer(next) {
+questionSchema.pre('validate', function checkCorrectAnswer() {
   if (this.type === QUESTION_TYPES.MCQ_SINGLE) {
     const ids = (this.options ?? []).map((option) => option.id);
     if (!this.correctAnswer || !ids.includes(this.correctAnswer)) {
       this.invalidate('correctAnswer', 'correctAnswer must match one of this question\'s option ids');
     }
   }
-  next();
 });
 
 questionSchema.index({ quiz: 1, order: 1 });
