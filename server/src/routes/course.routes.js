@@ -23,9 +23,10 @@ import { requireEnrollment } from "../middleware/requireEnrollment.js";
 import { getEnrollmentStatusMap } from "../services/enrollment.service.js";
 import { z } from "zod";
 import { objectIdSchema } from "../validators/fields.js";
-import * as searchController from '../controllers/search.controller.js';
-import { searchLimiter } from '../middleware/searchRateLimit.js';
-import { courseSearchQuerySchema } from '../validators/search.validator.js';
+import * as searchController from "../controllers/search.controller.js";
+import { searchLimiter } from "../middleware/searchRateLimit.js";
+import { courseSearchQuerySchema } from "../validators/search.validator.js";
+import { sendSuccess } from "../utils/apiResponse.js";
 
 const { ADMIN, MENTOR } = ROLES;
 
@@ -57,6 +58,14 @@ router.patch(
     [MENTOR]: mentorUpdateCourseSchema,
   }),
   courseController.update,
+);
+
+router.patch(
+  "/:id/thumbnail",
+  authorize(ADMIN, MENTOR),
+  access("manage"),
+  validate(z.strictObject({ mediaId: objectIdSchema.nullable() })),
+  courseController.setThumbnail,
 );
 
 router.delete(
@@ -103,9 +112,9 @@ router.get(
 );
 
 router.get(
-  '/:courseId/search',
+  "/:courseId/search",
   searchLimiter,
-  requireCourseAccess('read', { param: 'courseId' }),
+  requireCourseAccess("read", { param: "courseId" }),
   requireEnrollment(),
   validateQuery(courseSearchQuerySchema),
   searchController.course,

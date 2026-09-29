@@ -1,8 +1,8 @@
 import { getSafeUrl } from '../../../utils/safeUrl.js';
 
-export default function ImageBlock({ block }) {
-  const src = getSafeUrl(block.url);
-  if (!src) return null; // unsafe/invalid URL: fail safe, never render an unvetted src
+export default function ImageBlock({ block, resolvedSrc }) {
+  const src = block.mediaId ? resolvedSrc : getSafeUrl(block.url);
+  if (!src) return null; // still loading, unauthorized (silently omitted upstream), or genuinely unsafe
 
   return (
     <figure>

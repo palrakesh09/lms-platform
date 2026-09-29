@@ -10,6 +10,8 @@ import { nextOrder } from '../utils/nextOrder.js';
 import { buildPagination } from '../utils/pagination.js';
 import { resolveSlug, toSlugConflict } from '../utils/slug.js';
 import { deleteGuarded } from './deletion.service.js';
+import Media from '../models/Media.js';
+import { getSignedAccessUrl, loadForDelivery } from './media.service.js';
 
 const SLUG_CONFLICT_MESSAGE = 'A course with this slug already exists';
 
@@ -134,3 +136,26 @@ export const deleteCourse = (courseId) =>
       message: 'Cannot delete course because it contains modules. Remove its modules first.',
     },
   ]);
+
+// Falls back to the legacy external URL when no uploaded thumbnail is set — full backward compatibility.
+export const resolveThumbnailUrl = async (course) => {
+  if (!course.thumbnailMedia) return course.thumbnail || null;
+  try {
+    const media = await loadForDelivery(course.thumbnailMedia);
+    return (await getSignedAccessUrl(media, { disposition: 'inline' })).url;
+  } catch {
+    return course.thumbnail || null; // the media may have been deleted; fail back rather than break the page
+  }
+};
+
+export const setCourseThumbnail = async (courseId, mediaId, user) => {
+  if (mediaId) {
+    const media = await Media.findById(mediaId, 'course entityType status').lean();
+    if (!media || media.status !== 'active' || media.entityType !== 'course' || String(media.course) !== String(courseId)) {
+      throw new (await import('../utils/ApiError.js')).ApiError(422, 'Validation failed', [{ field: 'mediaId', message: 'This file was not uploaded for this course' }]);
+    }
+  }
+  const course = await Course.findByIdAndUpdate(courseId, { $set: { thumbnailMedia: mediaId || null, updatedBy: user.id } }, { new: true, lean: true });
+  if (!course) throw notFoundError();
+  return course;
+};

@@ -32,6 +32,17 @@ const resourceSchema = new mongoose.Schema(
     // content, or both. "At least one of the two" is enforced in resource.service.js.
     url: optionalUrlField('Resource'),
     openInNewTab: { type: Boolean, default: true },
+    attachments: {
+      type: [
+        {
+          _id: false,
+          media: { type: mongoose.Schema.Types.ObjectId, ref: 'Media', required: true },
+          title: { type: String, trim: true, default: '', maxlength: 150 },
+          order: { type: Number, default: 0, min: 0 },
+        },
+      ],
+      default: [],
+    },
     order: orderField(),
     status: statusField(),
     ...auditFields(),

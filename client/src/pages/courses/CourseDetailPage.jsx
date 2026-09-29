@@ -18,6 +18,8 @@ import { ROUTES } from "../../utils/paths.js";
 import { hasRole, ROLES } from "../../utils/roles.js";
 import EnrollButton from "../../components/courses/EnrollButton.jsx";
 import { useEnrollment } from "../../hooks/useEnrollment.js";
+import { useEffect } from 'react';
+import { useAIAssistant } from '../../hooks/useAIAssistant.js';
 
 function CourseDetailSkeleton() {
   return (
@@ -90,6 +92,13 @@ function StudentProgress({ courseId }) {
 }
 
 export default function CourseDetailPage() {
+  const { setContext, clearContext } = useAIAssistant();
+  useEffect(() => {
+    if (course.status !== REQUEST_STATUS.SUCCESS) return undefined;
+    setContext({ type: 'course', id: course.data.id, title: course.data.title });
+    return clearContext;
+  }, [course.status, course.data, setContext, clearContext]);
+  
   const { courseId } = useParams();
   const { user } = useAuth();
   const course = useCourse(courseId);

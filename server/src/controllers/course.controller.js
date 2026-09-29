@@ -4,21 +4,29 @@ import { getCourseStructure } from '../services/structure.service.js';
 import { sendSuccess } from '../utils/apiResponse.js';
 import { toCourse } from '../utils/serializers.js';
 import * as events from '../services/notification.events.js';
+import { resolveThumbnailUrl, setCourseThumbnail } from '../services/course.service.js';
 
 // By the time these run, requireCourseAccess has authorized the request and set req.content.
+
+const withThumbnail = async (course, user) => ({ ...toCourse(course, user), thumbnailUrl: await resolveThumbnailUrl(course) });
 
 export const list = async (req, res) => {
   const { items, pagination } = await courseService.listCourses(req.validatedQuery, req.user);
 
   sendSuccess(res, {
     message: 'Courses fetched successfully',
-    data: items.map((course) => toCourse(course, req.user)),
+    data: await Promise.all(items.map((c) => withThumbnail(c, req.user))),
     pagination,
   });
 };
 
 export const get = (req, res) => {
-  sendSuccess(res, { message: 'Course fetched successfully', data: toCourse(req.content.node, req.user) });
+  withThumbnail(req.content.node, req.user).then((data) => sendSuccess(res, { message: 'Course fetched successfully', data }));
+};
+
+export const setThumbnail = async (req, res) => {
+  const course = await setCourseThumbnail(req.content.node._id, req.body.mediaId, req.user);
+  sendSuccess(res, { message: 'Thumbnail updated', data: await withThumbnail(course, req.user) });
 };
 
 export const create = async (req, res) => {

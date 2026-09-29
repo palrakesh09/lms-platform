@@ -52,4 +52,5 @@ export const toResource = (doc, user) => ({
   url: doc.url,
   openInNewTab: doc.openInNewTab,
   content: doc.content ?? { version: 1, blocks: [] }, // required for rendering; safe for every role (no secrets live here)
+  attachments: (doc.attachments ?? []).map(toAttachmentSummary),
 });

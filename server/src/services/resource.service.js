@@ -6,6 +6,8 @@ import { ApiError } from '../utils/ApiError.js';
 import { notFoundError } from '../utils/contentErrors.js';
 import { nextOrder } from '../utils/nextOrder.js';
 import * as events from './notification.events.js';
+import Media from '../models/Media.js';
+import { resolveMediaContext } from './mediaAccess.service.js';
 
 const missingContentError = () =>
   new ApiError(422, 'Validation failed', [
@@ -64,4 +66,22 @@ export const update = async (id, input, user) => {
 export const remove = async (id) => {
   const deleted = await Resource.findByIdAndDelete(id);
   if (!deleted) throw notFoundError();
+};
+
+const assertMediaReferencesValid = async (conceptId, { content , attachments }) => {
+  const { course } = await resolveMediaContext('concept', conceptId);
+  const imageIds = (content?.blocks ?? []).filter((b) => b.type === 'image' && b.mediaId).map((b) => b.mediaId);
+  const attachmentIds = (attachments ?? []).map((a) => a.mediaId);
+  const allIds = [...new Set([...imageIds, ...attachmentIds])];
+  if (allIds.length === 0) return;
+
+  const docs = await Media.find({ _id: { $in: allIds }, status: 'active', course: course._id }).lean();
+  const byId = new Map(docs.map((d) => [String(d._id), d]));
+
+  for (const id of imageIds) {
+    if (byId.get(id)?.category !== 'image') throw new ApiError(422, 'Validation failed', [{ field: 'content', message: 'One or more images are invalid or do not belong to this course' }]);
+  }
+  for (const id of attachmentIds) {
+    if (byId.get(id)?.category !== 'document') throw new ApiError(422, 'Validation failed', [{ field: 'attachments', message: 'One or more attachments are invalid or do not belong to this course' }]);
+  }
 };

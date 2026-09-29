@@ -38,6 +38,13 @@ const resourceTypeSchema = z.enum(Object.values(RESOURCE_TYPES), 'Type must be t
 // url is optional as of Phase 12: a resource may carry an external URL, structured content, or both.
 // "at least one of the two" is enforced in resource.service.js, where a clear field-level 422 can be
 // returned against the actual merged document — see that file's hasUsableContent().
+
+const attachmentSchema = z.strictObject({
+  mediaId: z.string().trim(),
+  title: z.string().trim().max(150).optional(),
+  order: orderSchema.optional(),
+});
+
 const resourceShape = {
   type: resourceTypeSchema,
   title: titleSchema,
@@ -45,13 +52,14 @@ const resourceShape = {
   content: resourceContentSchema,
   url: optionalUrlSchema('Resource'),
   openInNewTab: z.boolean('openInNewTab must be true or false'),
+  attachments: z.array(attachmentSchema).max(10, 'A resource can have at most 10 attachments'),
   order: orderSchema,
   status: statusSchema,
 };
 
 export const createResourceSchema = z
   .strictObject(resourceShape)
-  .partial({ description: true, content: true, url: true, openInNewTab: true, order: true, status: true });
+  .partial({ description: true, content: true, url: true, openInNewTab: true, attachments: true, order: true, status: true });
 
 export const updateResourceSchema = z
   .strictObject(resourceShape)

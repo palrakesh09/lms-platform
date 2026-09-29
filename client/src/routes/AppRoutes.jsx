@@ -36,6 +36,7 @@ import SearchPage from '../pages/SearchPage.jsx';
 import ActivityPage from '../pages/ActivityPage.jsx';
 import NotificationsPage from '../pages/NotificationsPage.jsx';
 import AnnouncementsPage from '../pages/dashboard/AnnouncementsPage.jsx';
+import AdminAiSettingsPage from '../pages/dashboard/AdminAiSettingsPage.jsx';
 
 export default function AppRoutes() {
   return (
@@ -101,6 +102,7 @@ export default function AppRoutes() {
         path="admin"
         element={<DashboardGate area="admin" roles={[ROLES.ADMIN]} />}
       >
+        <Route path="ai-settings" element={<AdminAiSettingsPage />} />
         <Route path="announcements" element={<AnnouncementsPage area="admin" />} />
         <Route path="notifications" element={<NotificationsPage />} />
         <Route path="analytics" element={<AdminAnalyticsPage />} />

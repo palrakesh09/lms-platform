@@ -11,6 +11,7 @@ const NAV = {
     { label: 'Enrollments', to: '/admin/enrollments', icon: 'clipboard' },
     { label: 'Announcements', to: '/admin/announcements', icon: 'megaphone' },
     { label: 'Notifications', to: '/admin/notifications', icon: 'bell' },
+    { label: 'AI Assistant', to: '/admin/ai-settings', icon: 'chart' },
   ],
   mentor: [
     { label: 'Dashboard', to: '/mentor', icon: 'layout', end: true },

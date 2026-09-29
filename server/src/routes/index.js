@@ -20,12 +20,16 @@ import searchRoutes from './search.routes.js';
 import activityRoutes from './activity.routes.js';
 import announcementRoutes from './announcement.routes.js';
 import notificationRoutes from './notification.routes.js';
+import mediaRoutes from './media.routes.js';
+import aiRoutes from './ai.routes.js';
 
 const router = Router();
 
 router.use('/notifications', notificationRoutes);
 router.use('/announcements', announcementRoutes);
 router.use('/activity', activityRoutes);
+router.use('/media', mediaRoutes);
+router.use('/ai', aiRoutes);
 
 router.use('/analytics', analyticsRoutes);
 router.use('/enrollments', enrollmentRoutes);

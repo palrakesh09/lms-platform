@@ -10,12 +10,20 @@ import ResourceItem from './ResourceItem.jsx';
 import ResourceTypeBadge from './ResourceTypeBadge.jsx';
 import ConceptQuizList from '../quiz/ConceptQuizList.jsx';
 import ContentRenderer from '../content-renderer/ContentRenderer.jsx';
+import { useEffect } from 'react';
+import { useAIAssistant } from '../../hooks/useAIAssistant.js';
 
 // Shows one resource. Title, type and the Open button come from the already-loaded structure. The
 // description is fetched separately because the structure endpoint omits it. Nothing is embedded:
 // external pages are only ever opened by the user through a plain link.
 export default function ResourceViewer({ entry, courseId, completed, onCompletionChange }) {
   const { resource, concept, topic, module } = entry;
+  const { setContext, clearContext } = useAIAssistant();
+  useEffect(() => {
+    setContext({ type: 'resource', id: resource.id, title: resource.title });
+    return clearContext;
+  }, [resource.id, resource.title, setContext, clearContext]);
+  
   const { status, data, reload } = useResource(resource.id);
 
   const safeUrl = getSafeUrl(resource.url);

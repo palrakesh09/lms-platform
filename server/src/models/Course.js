@@ -21,6 +21,7 @@ const courseSchema = new Schema(
     shortDescription: textField('Short description', 200),
     description: textField('Description', 5000),
     thumbnail: optionalUrlField('Thumbnail'),
+    thumbnailMedia: { type: Schema.Types.ObjectId, ref: 'Media', default: null },
     level: {
       type: String,
       enum: {
