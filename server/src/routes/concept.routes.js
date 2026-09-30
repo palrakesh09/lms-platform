@@ -3,6 +3,7 @@ import { createNodeSchema, updateNodeSchema } from '../validators/content.valida
 import conceptQuizzesRouter from './conceptQuizzes.routes.js';
 import { createContentRoutes } from './createContentRoutes.js';
 import { conceptResourcesRouter } from './resource.routes.js';
+import  conceptCodingExercisesRouter  from './conceptCodingExercises.routes.js';
 
 const { nested, router } = createContentRoutes({
   controller: conceptController,
@@ -15,6 +16,7 @@ const { nested, router } = createContentRoutes({
 // Mounted after the factory's `authenticate`, so both are authenticated.
 router.use('/:conceptId/resources', conceptResourcesRouter);
 router.use('/:conceptId/quizzes', conceptQuizzesRouter);
+router.use('/:conceptId/coding-exercises', conceptCodingExercisesRouter);
 
 // GET|POST /api/topics/:topicId/concepts (mounted by topic.routes.js)
 export const topicConceptsRouter = nested;

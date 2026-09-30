@@ -77,4 +77,8 @@ export const deleteConversation = async (userId, id) => {
   if (result.deletedCount === 0) throw notFoundError();
 };
 
+
+export const explainExercise = (user, { exerciseId, code }) =>
+  runTurn(user, { contextType: 'concept', contextId: /* resolved from exercise.attachmentId server-side */ undefined, mode: 'code_explain', userVisibleMessage: 'Explain this exercise', modelPrompt: `Explain this coding exercise in simple terms:\n${code ?? ''}`, language: 'en' });
+
 export { AI_MODES };

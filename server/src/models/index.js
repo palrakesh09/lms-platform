@@ -17,3 +17,5 @@ export { default as Media } from './Media.js';
 export { default as AiConversation } from './AiConversation.js';
 export { default as AiUsageEvent } from './AiUsageEvent.js';
 export { default as AiSettings } from './AiSettings.js';
+export { default as CodingExercise } from './CodingExercise.js';
+export { default as CodingAttempt } from './CodingAttempt.js';

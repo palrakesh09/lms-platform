@@ -13,6 +13,7 @@ import UsersPage from "../components/dashboard/UsersPage.jsx";
 import HomePage from "../pages/HomePage.jsx";
 import LearningIndexPage from "../pages/learning/LearningIndexPage.jsx";
 import ResourcePage from "../pages/learning/ResourcePage.jsx";
+import CodingExercisePage from "../pages/learning/CodingExercisePage.jsx";
 import LoginPage from "../pages/LoginPage.jsx";
 import MyLearningPage from "../pages/courses/MyLearningPage.jsx";
 import NotFoundPage from "../pages/NotFoundPage.jsx";
@@ -153,6 +154,7 @@ export default function AppRoutes() {
         <Route path="learn/:courseId" element={<LearningLayout />}>
           <Route index element={<LearningIndexPage />} />
           <Route path="resource/:resourceId" element={<ResourcePage />} />
+          <Route path="coding/:exerciseId" element={<CodingExercisePage />} />
         </Route>
       </Route>
     </Routes>

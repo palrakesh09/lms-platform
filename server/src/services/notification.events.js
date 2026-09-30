@@ -8,6 +8,18 @@ import { recordActivity } from './activity.service.js';
 import { loadContentChain } from './contentAccess.service.js';
 import { notifyFromCursor, notifyOne } from './notification.service.js';
 
+export const conceptCodingStarted = (studentId, exercise) =>
+  safely('conceptCodingStarted', () => recordActivity({ userId: studentId, type: 'coding_exercise_started', course: exercise.course, concept: exercise.attachmentId, title: exercise.title, dedupeKey: `coding_started:${exercise._id}:${studentId}` }));
+
+export const conceptCodingSubmitted = (studentId, exercise, attempt) =>
+  safely('conceptCodingSubmitted', () => recordActivity({
+    userId: studentId, type: attempt.status === 'passed' ? 'coding_exercise_passed' : 'coding_exercise_submitted',
+    course: exercise.course, concept: exercise.attachmentId, title: exercise.title,
+    metadata: { attemptId: String(attempt._id), passedTests: attempt.passedTests, totalTests: attempt.totalTests },
+    dedupeKey: `coding_submit:${attempt._id}`,
+  }));
+
+  
 // Events must never fail the user's action. Awaited (so callers/tests are deterministic) but contained.
 const safely = async (label, fn) => {
   try {

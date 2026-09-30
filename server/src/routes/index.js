@@ -22,9 +22,13 @@ import announcementRoutes from './announcement.routes.js';
 import notificationRoutes from './notification.routes.js';
 import mediaRoutes from './media.routes.js';
 import aiRoutes from './ai.routes.js';
+import codingExerciseRoutes from './conceptCodingExercises.routes.js';
+import codingAttemptRoutes from './codingAttempt.routes.js';
 
 const router = Router();
 
+router.use('/coding-exercises', codingExerciseRoutes); // also serves /:exerciseId/submissions
+router.use('/coding-attempts', codingAttemptRoutes);
 router.use('/notifications', notificationRoutes);
 router.use('/announcements', announcementRoutes);
 router.use('/activity', activityRoutes);
