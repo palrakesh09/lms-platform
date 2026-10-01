@@ -1,107 +1,365 @@
-import { useCallback, useState } from 'react';
-import { Link, useParams } from 'react-router';
-import ApiErrorState from '../../components/common/ApiErrorState.jsx';
-import { secondaryButton } from '../../components/common/buttonClasses.js';
-import Skeleton, { LoadingRegion } from '../../components/common/Skeleton.jsx';
-import StatusBadge from '../../components/common/StatusBadge.jsx';
-import ContentTree from '../../components/dashboard/content/ContentTree.jsx';
-import CourseActionDialog from '../../components/dashboard/courses/CourseActionDialog.jsx';
-import CourseMentorsPanel from '../../components/dashboard/courses/CourseMentorsPanel.jsx';
-import { PageHeader, Panel } from '../../components/dashboard/DashboardUi.jsx';
-import { REQUEST_STATUS } from '../../hooks/useApiResource.js';
-import { useCourse } from '../../hooks/useCourse.js';
-import { useRefreshableResource } from '../../hooks/useRefreshableResource.js';
-import { getCourseStructure } from '../../services/courseService.js';
-import { dashboardPaths } from '../../utils/dashboardPaths.js';
-import { ROUTES } from '../../utils/paths.js';
-import { countStructure } from '../../utils/courseStructure.js';
-import { pluralize } from '../../utils/formatters.js';
+import { useCallback, useMemo, useState } from "react";
+import { Link, useSearchParams } from "react-router";
 
-// Content management for one course. The course header uses useCourse (loaded once); the tree uses
-// useRefreshableResource so create/edit/delete refresh it in place without a skeleton flash.
-export default function ManageCoursePage({ area }) {
-  const isAdmin = area === 'admin';
-  const { courseId } = useParams();
+import ApiErrorState from "../../components/common/ApiErrorState.jsx";
+import EmptyState from "../../components/common/EmptyState.jsx";
+import FilterDropdown from "../../components/common/FilterDropdown.jsx";
+import Icon from "../../components/common/Icon.jsx";
+import Pagination from "../../components/common/Pagination.jsx";
+import SearchInput from "../../components/common/SearchInput.jsx";
+import Skeleton, {
+  LoadingRegion,
+} from "../../components/common/Skeleton.jsx";
+
+import CourseActionDialog from "./courses/CourseActionDialog.jsx";
+import CourseTable from "./courses/CourseTable.jsx";
+
+import {
+  PageHeader,
+  Panel,
+} from "./DashboardUi.jsx";
+
+import {
+  REQUEST_STATUS,
+} from "../../hooks/useApiResource.js";
+
+import {
+  useRefreshableResource,
+} from "../../hooks/useRefreshableResource.js";
+
+import { getCourses } from "../../services/courseService.js";
+import { dashboardPaths } from "../../utils/dashboardPaths.js";
+
+import {
+  CONTENT_STATUS_OPTIONS,
+  LEVEL_OPTIONS,
+} from "../../utils/enums.js";
+
+import { pluralize } from "../../utils/formatters.js";
+import { parseCourseListParams } from "../../utils/listParams.js";
+
+import {
+  primaryButton,
+  secondaryButton,
+} from "../../components/common/buttonClasses.js";
+
+const PAGE_SIZE = 10;
+
+export default function ManageCoursesPage({
+  area,
+}) {
+  const isAdmin = area === "admin";
   const paths = dashboardPaths(area);
+
+  const [
+    searchParams,
+    setSearchParams,
+  ] = useSearchParams();
+
+  const {
+    page,
+    search,
+    category,
+    level,
+    status: courseStatus,
+  } = useMemo(
+    () =>
+      parseCourseListParams(searchParams),
+    [searchParams],
+  );
+
+  const [resetKey, setResetKey] = useState(0);
   const [action, setAction] = useState(null);
 
-  const course = useCourse(courseId);
-  const structureFetcher = useCallback((signal) => getCourseStructure(courseId, signal), [courseId]);
-  const structure = useRefreshableResource(structureFetcher);
+  const fetcher = useCallback(
+    (signal) =>
+      getCourses(
+        {
+          page,
+          limit: PAGE_SIZE,
+          search,
+          category,
+          level,
+          status: courseStatus,
+        },
+        signal,
+      ),
+    [
+      page,
+      search,
+      category,
+      level,
+      courseStatus,
+    ],
+  );
 
-  if (course.status === REQUEST_STATUS.LOADING) {
-    return (
-      <LoadingRegion label="Loading course…" className="space-y-4">
-        <Skeleton className="h-8 w-1/2" />
-        <Skeleton className="h-40 w-full" />
-      </LoadingRegion>
-    );
-  }
-  if (course.status === REQUEST_STATUS.ERROR) {
-    return <ApiErrorState error={course.error} subject="course" onRetry={course.reload} backTo={paths.courses} backLabel="Back to courses" />;
-  }
+  const {
+    status,
+    data,
+    error,
+    isRefreshing,
+    refresh,
+    reload,
+  } = useRefreshableResource(fetcher);
 
-  const { data: courseData } = course;
-  const counts = structure.status === REQUEST_STATUS.SUCCESS ? countStructure(structure.data) : null;
+  const updateParams = (
+    patch,
+    { keepPage = false } = {},
+  ) => {
+    setSearchParams((previous) => {
+      const next = new URLSearchParams(
+        previous,
+      );
+
+      Object.entries(patch).forEach(
+        ([key, value]) => {
+          if (
+            value !== "" &&
+            value !== undefined &&
+            value !== null
+          ) {
+            next.set(key, String(value));
+          } else {
+            next.delete(key);
+          }
+        },
+      );
+
+      if (!keepPage) {
+        next.delete("page");
+      }
+
+      return next;
+    });
+  };
+
+  const hasFilters = Boolean(
+    search ||
+      category ||
+      level ||
+      courseStatus,
+  );
+
+  const clearFilters = () => {
+    setSearchParams(new URLSearchParams());
+    setResetKey((value) => value + 1);
+  };
 
   return (
-    <>
+    <div className="animate-page-in">
       <PageHeader
-        title={courseData.title}
-        backTo={paths.courses}
-        backLabel="Back to courses"
+        title={isAdmin ? "Course Library" : "My Courses"}
         description={
-          <div className="flex flex-wrap items-center gap-2">
-            <StatusBadge status={courseData.status} />
-            {counts && (
-              <span className="text-sm text-slate-600">
-                {[pluralize(counts.modules, 'module'), pluralize(counts.topics, 'topic'), pluralize(counts.concepts, 'concept'), pluralize(counts.resources, 'resource')].join(' · ')}
-              </span>
-            )}
-          </div>
+          status === REQUEST_STATUS.SUCCESS
+            ? `${pluralize(
+                data.pagination.total,
+                "course",
+              )}${isRefreshing ? " · Refreshing..." : ""}`
+            : "Search, filter and manage learning content."
         }
         actions={
-          <>
-            <Link to={ROUTES.course(courseData.id)} className={secondaryButton}>
-              View public page
+          isAdmin && (
+            <Link
+              to={paths.newCourse}
+              className={primaryButton}
+            >
+              <Icon
+                name="plus"
+                className="size-4"
+              />
+              New course
             </Link>
-            <Link to={paths.editCourse(courseData.id)} className={secondaryButton}>
-              Edit course
-            </Link>
-            {isAdmin && courseData.status !== 'published' && (
-              <button type="button" onClick={() => setAction({ type: 'publish', course: courseData })} className={secondaryButton}>
-                Publish
-              </button>
-            )}
-            {isAdmin && courseData.status !== 'archived' && (
-              <button type="button" onClick={() => setAction({ type: 'archive', course: courseData })} className={secondaryButton}>
-                Archive
-              </button>
-            )}
-          </>
+          )
         }
       />
 
-      <div className="space-y-6">
-        {isAdmin && <CourseMentorsPanel courseId={courseData.id} />}
+      <Panel
+        title="Course Directory"
+        description="Server-side search and filtering."
+        className="mb-5"
+      >
+        <div
+          key={resetKey}
+          className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4"
+        >
+          <SearchInput
+            id="course-search"
+            label="Search"
+            defaultValue={search}
+            placeholder="Search courses..."
+            onSearch={(value) =>
+              updateParams({
+                search: value,
+              })
+            }
+          />
 
-        <Panel title="Course content" description="Modules, topics, concepts and resources, in the order students will see them.">
-          {structure.status === REQUEST_STATUS.LOADING && (
-            <LoadingRegion label="Loading course content…" className="space-y-2">
-              <Skeleton className="h-16 w-full" />
-              <Skeleton className="h-16 w-full" />
-            </LoadingRegion>
-          )}
-          {structure.status === REQUEST_STATUS.ERROR && (
-            <ApiErrorState error={structure.error} subject="course content" onRetry={structure.reload} />
-          )}
-          {structure.status === REQUEST_STATUS.SUCCESS && (
-            <ContentTree structure={structure.data} onChanged={structure.refresh} />
-          )}
-        </Panel>
-      </div>
+          <SearchInput
+            id="category-filter"
+            label="Category"
+            defaultValue={category}
+            placeholder="web-development"
+            onSearch={(value) =>
+              updateParams({
+                category: value,
+              })
+            }
+          />
 
-      {action && <CourseActionDialog action={action.type} course={action.course} onClose={() => setAction(null)} onDone={() => course.reload()} />}
-    </>
+          <FilterDropdown
+            id="level-filter"
+            label="Level"
+            value={level}
+            options={LEVEL_OPTIONS}
+            onChange={(value) =>
+              updateParams({
+                level: value,
+              })
+            }
+          />
+
+          <FilterDropdown
+            id="status-filter"
+            label="Status"
+            value={courseStatus}
+            options={CONTENT_STATUS_OPTIONS}
+            onChange={(value) =>
+              updateParams({
+                status: value,
+              })
+            }
+          />
+        </div>
+
+        {hasFilters && (
+          <div className="mt-5 flex items-center justify-between border-t border-[#2A2A2A] pt-4">
+            <span className="font-mono text-[10px] uppercase tracking-[0.15em] text-neutral-700">
+              Filters active
+            </span>
+
+            <button
+              type="button"
+              onClick={clearFilters}
+              className={secondaryButton}
+            >
+              Clear filters
+            </button>
+          </div>
+        )}
+      </Panel>
+
+      {status === REQUEST_STATUS.LOADING && (
+        <LoadingRegion
+          label="Loading courses..."
+          className="space-y-2"
+        >
+          {Array.from(
+            { length: 5 },
+            (_, index) => (
+              <Skeleton
+                key={index}
+                className="h-20 w-full"
+              />
+            ),
+          )}
+        </LoadingRegion>
+      )}
+
+      {status === REQUEST_STATUS.ERROR && (
+        <ApiErrorState
+          error={error}
+          subject="courses"
+          onRetry={reload}
+        />
+      )}
+
+      {status === REQUEST_STATUS.SUCCESS && (
+        <>
+          {data.items.length === 0 ? (
+            <EmptyState
+              title={
+                hasFilters
+                  ? "No matching courses"
+                  : "No courses yet"
+              }
+              message={
+                hasFilters
+                  ? "Try changing your search or filters."
+                  : isAdmin
+                    ? "Create your first course to get started."
+                    : "You have not been assigned any courses yet."
+              }
+            >
+              {hasFilters ? (
+                <button
+                  type="button"
+                  onClick={clearFilters}
+                  className={secondaryButton}
+                >
+                  Clear filters
+                </button>
+              ) : (
+                isAdmin && (
+                  <Link
+                    to={paths.newCourse}
+                    className={primaryButton}
+                  >
+                    <Icon
+                      name="plus"
+                      className="size-4"
+                    />
+                    New course
+                  </Link>
+                )
+              )}
+            </EmptyState>
+          ) : (
+            <>
+              <CourseTable
+                courses={data.items}
+                area={area}
+                onAction={setAction}
+              />
+
+              <div className="mt-5">
+                <Pagination
+                  page={data.pagination.page}
+                  totalPages={
+                    data.pagination.totalPages
+                  }
+                  onPageChange={(next) =>
+                    updateParams(
+                      {
+                        page:
+                          next > 1
+                            ? String(next)
+                            : "",
+                      },
+                      {
+                        keepPage: true,
+                      },
+                    )
+                  }
+                />
+              </div>
+            </>
+          )}
+        </>
+      )}
+
+      {action && (
+        <CourseActionDialog
+          action={action.type}
+          course={action.course}
+          onClose={() =>
+            setAction(null)
+          }
+          onDone={() => {
+            setAction(null);
+            refresh();
+          }}
+        />
+      )}
+    </div>
   );
 }

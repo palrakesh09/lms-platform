@@ -17,34 +17,42 @@ export default function QuizAttemptsPage() {
   if (status === REQUEST_STATUS.ERROR) return <ApiErrorState error={error} subject="attempts" onRetry={reload} />;
 
   return (
-    <div className="mx-auto max-w-lg space-y-4">
-      <h1 className="text-2xl font-bold tracking-tight">Attempt History</h1>
-      {data.length === 0 ? (
-        <EmptyState title="No attempts yet" message="You haven't attempted this quiz yet." />
-      ) : (
-        <ul className="divide-y divide-slate-100 rounded-lg border border-slate-200 bg-white">
-          {data.map((attempt) => (
-            <li key={attempt.attemptId} className="flex items-center justify-between gap-3 px-4 py-3">
-              <div>
-                <p className="text-sm font-medium text-slate-900">Attempt {attempt.attemptNumber}</p>
-                <p className="text-xs text-slate-600">{attempt.status === 'submitted' ? formatDate(attempt.submittedAt) : 'In progress'}</p>
-              </div>
-              <div className="flex items-center gap-3">
-                {attempt.status === 'submitted' && (
-                  <>
-                    <span className="text-sm font-medium text-slate-900">{Math.round(attempt.percentage)}%</span>
-                    <StatusBadge status={attempt.passed ? 'active' : 'inactive'} label={attempt.passed ? 'Passed' : 'Failed'} />
-                    <Link to={`/quiz/${quizId}/result/${attempt.attemptId}`} className={linkButton}>View</Link>
-                  </>
-                )}
-                {attempt.status === 'in_progress' && (
-                  <Link to={`/quiz/${quizId}/attempt/${attempt.attemptId}`} className={linkButton}>Continue</Link>
-                )}
-              </div>
-            </li>
-          ))}
-        </ul>
-      )}
+    <div className="min-h-screen bg-[#0A0A0A]">
+  <QuizHeader
+    title={quiz?.title}
+    currentQuestion={currentQuestionIndex + 1}
+    totalQuestions={questions.length}
+    timeLeft={timeLeft}
+    onExit={handleExit}
+  />
+
+  <main className="mx-auto grid max-w-[1400px] gap-6 p-4 sm:p-6 lg:grid-cols-[260px_minmax(0,1fr)] lg:p-8">
+    <div className="lg:sticky lg:top-24 lg:self-start">
+      <QuestionPalette
+        total={questions.length}
+        currentIndex={currentQuestionIndex}
+        answers={answers}
+        onSelect={setCurrentQuestionIndex}
+      />
     </div>
+
+    <div className="min-w-0 border border-[var(--border)] bg-[#0D0D0D] p-5 sm:p-8 lg:p-12">
+      <QuestionCard
+        question={questions[currentQuestionIndex]}
+        selectedAnswer={currentAnswer}
+        onAnswer={handleAnswer}
+      />
+
+      <QuizNavigation
+        isFirst={currentQuestionIndex === 0}
+        isLast={currentQuestionIndex === questions.length - 1}
+        canContinue={currentAnswer != null}
+        onPrevious={handlePrevious}
+        onNext={handleNext}
+        onSubmit={handleSubmit}
+      />
+    </div>
+  </main>
+</div>
   );
 }

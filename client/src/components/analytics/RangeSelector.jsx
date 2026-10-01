@@ -1,21 +1,41 @@
 import { RANGES } from '../../hooks/useAnalyticsRange.js';
 
-export default function RangeSelector({ value, onChange }) {
+export default function RangeSelector({
+  value,
+  onChange,
+}) {
   return (
-    <div role="group" aria-label="Date range" className="inline-flex rounded-md border border-slate-300 bg-white p-0.5">
-      {RANGES.map((option) => (
-        <button
-          key={option.value}
-          type="button"
-          onClick={() => onChange(option.value)}
-          aria-pressed={value === option.value}
-          className={`rounded px-3 py-1.5 text-sm font-medium transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 ${
-            value === option.value ? 'bg-indigo-600 text-white' : 'text-slate-700 hover:bg-slate-100'
-          }`}
-        >
-          {option.label}
-        </button>
-      ))}
+    <div
+      role="group"
+      aria-label="Date range"
+      className="grid w-full grid-cols-2 border border-neutral-800 bg-[#0A0A0A] p-1 sm:inline-flex sm:w-auto sm:grid-cols-none"
+    >
+      {RANGES.map((option) => {
+        const isActive = value === option.value;
+
+        return (
+          <button
+            key={option.value}
+            type="button"
+            onClick={() => onChange(option.value)}
+            aria-pressed={isActive}
+            className={[
+              'min-h-9 px-3 py-2',
+              'font-mono text-[10px] font-bold uppercase tracking-wider',
+              'transition-all duration-200',
+              'focus-visible:outline-2 focus-visible:outline-offset-2',
+              'focus-visible:outline-[#FF3E00]',
+              'touch-manipulation',
+              isActive
+                ? 'bg-[#FF3E00] text-white'
+                : 'text-neutral-500 hover:bg-[#171717] hover:text-white',
+            ].join(' ')}
+          >
+            {option.label}
+          </button>
+        );
+      })}
     </div>
   );
 }
+

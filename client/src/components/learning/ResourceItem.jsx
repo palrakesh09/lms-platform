@@ -1,34 +1,92 @@
-import { useEffect, useRef } from 'react';
-import { Link } from 'react-router';
-import { getResourceTypeMeta } from '../../utils/resourceTypes.js';
-import Icon from '../common/Icon.jsx';
+import { Link } from "react-router-dom";
+import { Icon } from "../common/Icon";
+import { ROUTES } from "../../utils/paths";
 
-// One selectable resource. The active state comes from the route (via `isActive`), not from local state.
-// `autoScroll` keeps the active item visible inside a long, scrollable sidebar.
-export default function ResourceItem({ resource, to, isActive, onNavigate, autoScroll = false }) {
-  const ref = useRef(null);
-  const meta = getResourceTypeMeta(resource.type);
+const RESOURCE_ICONS = {
+  video: "play",
+  article: "file-text",
+  document: "file",
+  pdf: "file",
+  code: "code",
+  coding: "code",
+  quiz: "clipboard",
+  image: "image",
+  link: "external-link",
+};
 
-  useEffect(() => {
-    if (autoScroll && isActive) ref.current?.scrollIntoView({ block: 'nearest' });
-  }, [autoScroll, isActive]);
+function getResourceIcon(type) {
+  return RESOURCE_ICONS[String(type || "").toLowerCase()] || "file";
+}
+
+export default function ResourceItem({
+  resource,
+  index = 0,
+  isActive = false,
+  isCompleted = false,
+}) {
+  const resourceId = resource?._id || resource?.id;
+  const courseId = resource?.courseId;
+
+  const resourceType =
+    resource?.type ||
+    resource?.resourceType ||
+    resource?.contentType ||
+    "resource";
+
+  const target =
+    courseId && resourceId
+      ? ROUTES.learn(courseId, resourceId)
+      : "#";
 
   return (
     <Link
-      ref={ref}
-      to={to}
-      onClick={onNavigate}
-      aria-current={isActive ? 'page' : undefined}
-      className={`flex items-start gap-2 rounded-md px-2 py-1.5 text-sm transition-colors focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-indigo-600 ${
+      to={target}
+      className={[
+        "group relative flex min-h-10 items-center gap-2 px-3 py-2",
+        "transition-all duration-200",
         isActive
-          ? 'bg-indigo-50 font-medium text-indigo-900 ring-1 ring-inset ring-indigo-200'
-          : 'text-slate-700 hover:bg-slate-100'
-      }`}
+          ? "bg-[var(--accent)]/[0.08] text-white"
+          : "text-[var(--muted)] hover:bg-white/[0.03] hover:text-white",
+      ].join(" ")}
     >
-      <Icon name={meta.icon} className={`mt-0.5 size-4 shrink-0 ${meta.iconClass}`} />
-      <span className="min-w-0">
-        <span className="block wrap-break-word leading-snug">{resource.title}</span>
-        <span className="block text-xs font-normal text-slate-600">{meta.label}</span>
+      {isActive && (
+        <span className="absolute left-[-9px] top-0 h-full w-[2px] bg-[var(--accent)]" />
+      )}
+
+      <span
+        className={[
+          "flex h-5 w-5 shrink-0 items-center justify-center",
+          isCompleted
+            ? "text-[var(--success)]"
+            : isActive
+              ? "text-[var(--accent)]"
+              : "text-[var(--muted)]",
+        ].join(" ")}
+      >
+        {isCompleted ? (
+          <Icon name="check-circle" size={13} />
+        ) : (
+          <Icon name={getResourceIcon(resourceType)} size={13} />
+        )}
+      </span>
+
+      <span className="min-w-0 flex-1">
+        <span
+          className={[
+            "block truncate text-[10px] leading-4",
+            isActive ? "font-semibold text-white" : "font-medium",
+          ].join(" ")}
+        >
+          {resource?.title || "Untitled Resource"}
+        </span>
+
+        <span className="block font-mono text-[8px] uppercase tracking-wider text-[var(--muted)]">
+          {String(resourceType).replace(/[-_]/g, " ")}
+        </span>
+      </span>
+
+      <span className="font-mono text-[8px] text-[var(--muted)] opacity-0 transition-opacity group-hover:opacity-100">
+        {String(index + 1).padStart(2, "0")}
       </span>
     </Link>
   );

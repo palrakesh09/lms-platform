@@ -1,21 +1,46 @@
 import { formatLabel } from '../../utils/formatters.js';
 
 const STYLES = {
-  draft: 'bg-amber-50 text-amber-800 ring-amber-200',
-  published: 'bg-emerald-50 text-emerald-800 ring-emerald-200',
-  archived: 'bg-slate-100 text-slate-700 ring-slate-200',
-  active: 'bg-emerald-50 text-emerald-800 ring-emerald-200',
-  inactive: 'bg-red-50 text-red-800 ring-red-200',
+  draft:
+    'border-[#f59e0b]/30 bg-[#17130a] text-[#f59e0b]',
+
+  published:
+    'border-[#22c55e]/30 bg-[#0d1a12] text-[#22c55e]',
+
+  archived:
+    'border-[#404040] bg-[#171717] text-[#888]',
+
+  active:
+    'border-[#22c55e]/30 bg-[#0d1a12] text-[#22c55e]',
+
+  inactive:
+    'border-[#ef4444]/30 bg-[#1a0d0d] text-[#ef4444]',
 };
 
 export default function StatusBadge({ status, label }) {
+  const style =
+    STYLES[status] ??
+    'border-[#404040] bg-[#171717] text-[#888]';
+
   return (
     <span
-      className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ring-1 ring-inset ${
-        STYLES[status] ?? 'bg-slate-100 text-slate-700 ring-slate-200'
-      }`}
+      className={`inline-flex max-w-full items-center border px-2 py-1 font-mono text-[8px] font-semibold uppercase tracking-[0.12em] leading-none sm:px-2.5 sm:text-[9px] sm:tracking-[0.15em] ${style}`}
     >
-      {label ?? formatLabel(status)}
+      <span
+        className={`mr-1.5 size-1.5 shrink-0 rounded-full ${
+          status === 'published' || status === 'active'
+            ? 'bg-[#22c55e]'
+            : status === 'draft'
+              ? 'bg-[#f59e0b]'
+              : status === 'inactive'
+                ? 'bg-[#ef4444]'
+                : 'bg-[#666]'
+        }`}
+      />
+
+      <span className="truncate">
+        {label ?? formatLabel(status)}
+      </span>
     </span>
   );
 }

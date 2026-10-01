@@ -1,8 +1,16 @@
 export default function QuoteBlock({ block }) {
   return (
-    <blockquote className="border-l-4 border-indigo-200 pl-4 italic text-slate-700">
-      <p className="whitespace-pre-line wrap-break-word">{block.text}</p>
-      {block.attribution && <cite className="mt-1 block text-sm not-italic text-slate-500">— {block.attribution}</cite>}
+    <blockquote className="border-l-2 border-[#FF3E00] bg-[#111111] px-4 py-4 sm:px-5">
+      <p className="break-words whitespace-pre-line text-[15px] leading-7 italic text-neutral-300 sm:text-base">
+        {block.text}
+      </p>
+
+      {block.attribution && (
+        <cite className="mt-3 block font-mono text-[11px] not-italic uppercase tracking-wider text-neutral-500">
+          — {block.attribution}
+        </cite>
+      )}
     </blockquote>
   );
 }
+

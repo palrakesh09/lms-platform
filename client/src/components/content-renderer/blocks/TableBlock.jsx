@@ -1,17 +1,44 @@
 export default function TableBlock({ block }) {
   return (
-    <div className="overflow-x-auto">
+    <div className="overflow-x-auto border border-[#2A2A2A] bg-[#111111]">
       <table className="min-w-full border-collapse text-sm">
-        <caption className="sr-only">Data table</caption>
+        <caption className="sr-only">
+          Data table
+        </caption>
+
         <thead>
-          <tr>{(block.headers ?? []).map((h, i) => <th key={i} scope="col" className="border border-slate-200 bg-slate-50 px-3 py-2 text-left font-semibold text-slate-700">{h}</th>)}</tr>
+          <tr>
+            {(block.headers ?? []).map((header, index) => (
+              <th
+                key={index}
+                scope="col"
+                className="border-b border-[#2A2A2A] bg-[#171717] px-3 py-3 text-left font-mono text-[11px] uppercase tracking-wider text-neutral-300 sm:px-4"
+              >
+                {header}
+              </th>
+            ))}
+          </tr>
         </thead>
+
         <tbody>
-          {(block.rows ?? []).map((row, ri) => (
-            <tr key={ri}>{row.map((cell, ci) => <td key={ci} className="border border-slate-200 px-3 py-2 text-slate-700">{cell}</td>)}</tr>
+          {(block.rows ?? []).map((row, rowIndex) => (
+            <tr
+              key={rowIndex}
+              className="transition hover:bg-[#171717]"
+            >
+              {row.map((cell, cellIndex) => (
+                <td
+                  key={cellIndex}
+                  className="border-b border-[#222222] px-3 py-3 text-neutral-400 sm:px-4"
+                >
+                  {cell}
+                </td>
+              ))}
+            </tr>
           ))}
         </tbody>
       </table>
     </div>
   );
 }
+

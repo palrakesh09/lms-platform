@@ -1,30 +1,45 @@
 import { useState } from 'react';
-import { useAuth } from '../../hooks/useAuth.js';
-import { markConceptComplete, markConceptIncomplete } from '../../services/progressService.js';
-import { getMutationError } from '../../utils/getMutationError.js';
-import { primaryButton, secondaryButton } from '../common/buttonClasses.js';
 
-// Completion is tracked at the CONCEPT level (the Progress model has no per-resource field), so this
-// applies to the whole concept, whichever of its resources is currently open. It is always explicit —
-// opening a resource never sets it (see ResourcePage's access-recording effect, which only ever
-// touches lastAccessedAt) — and the button always reflects the server's last confirmed response: a
-// failed request leaves it exactly as it was.
-export default function CompletionToggle({ conceptId, completed, onChanged }) {
+import { useAuth } from '../../hooks/useAuth.js';
+
+import {
+  markConceptComplete,
+  markConceptIncomplete,
+} from '../../services/progressService.js';
+
+import { getMutationError } from '../../utils/getMutationError.js';
+
+import Icon from '../common/Icon.jsx';
+
+export default function CompletionToggle({
+  conceptId,
+  completed,
+  onChanged,
+}) {
   const { expireSession } = useAuth();
+
   const [pending, setPending] = useState(false);
   const [error, setError] = useState('');
 
   const toggle = async () => {
     if (pending) return;
+
     setPending(true);
     setError('');
 
     try {
-      const updated = completed ? await markConceptIncomplete(conceptId) : await markConceptComplete(conceptId);
+      const updated = completed
+        ? await markConceptIncomplete(conceptId)
+        : await markConceptComplete(conceptId);
+
       onChanged(updated);
     } catch (failure) {
       const info = getMutationError(failure);
-      if (info.kind === 'unauthorized') expireSession();
+
+      if (info.kind === 'unauthorized') {
+        expireSession();
+      }
+
       setError(info.message);
     } finally {
       setPending(false);
@@ -38,12 +53,50 @@ export default function CompletionToggle({ conceptId, completed, onChanged }) {
         onClick={toggle}
         disabled={pending}
         aria-pressed={completed}
-        className={completed ? secondaryButton : primaryButton}
+        className={`
+          inline-flex items-center gap-2
+          border px-4 py-2.5
+          text-sm font-semibold
+          transition-all duration-200
+          disabled:cursor-not-allowed
+          disabled:opacity-50
+
+          ${
+            completed
+              ? 'border-emerald-900/60 bg-emerald-950/20 text-emerald-400 hover:border-red-900/60 hover:bg-red-950/20 hover:text-red-400'
+              : 'border-[#FF3E00] bg-[#FF3E00] text-black hover:bg-[#ff5722]'
+          }
+        `}
       >
-        {pending ? 'Saving…' : completed ? '✓ Completed — click to undo' : 'Mark as Complete'}
+        {pending ? (
+          <>
+            <span className="size-3.5 animate-spin rounded-full border-2 border-current border-t-transparent" />
+            Saving...
+          </>
+        ) : completed ? (
+          <>
+            <Icon
+              name="check"
+              className="size-4"
+            />
+            Completed
+          </>
+        ) : (
+          <>
+            <span className="flex size-4 items-center justify-center border border-current">
+              <span className="size-1.5" />
+            </span>
+
+            Mark as Complete
+          </>
+        )}
       </button>
+
       {error && (
-        <p role="alert" className="mt-2 text-sm text-red-600">
+        <p
+          role="alert"
+          className="mt-2 text-xs text-red-400"
+        >
           {error}
         </p>
       )}

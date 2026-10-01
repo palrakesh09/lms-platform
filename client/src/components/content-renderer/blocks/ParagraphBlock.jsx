@@ -1,3 +1,8 @@
 export default function ParagraphBlock({ block }) {
-  return <p className="whitespace-pre-line wrap-break-word leading-relaxed text-slate-700">{block.text}</p>;
+  return (
+    <p className="break-words whitespace-pre-line text-[15px] leading-7 text-neutral-300 sm:text-base">
+      {block.text}
+    </p>
+  );
 }
+

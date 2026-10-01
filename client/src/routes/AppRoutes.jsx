@@ -32,12 +32,13 @@ import AdminAnalyticsPage from "../pages/admin/AdminAnalyticsPage.jsx";
 import MentorAnalyticsPage from "../pages/mentor/MentorAnalyticsPage.jsx";
 import MentorCourseAnalyticsPage from "../pages/mentor/MentorCourseAnalyticsPage.jsx";
 import StudentPerformancePage from "../pages/student/StudentPerformancePage.jsx";
-import AdminEnrollmentsPage from '../pages/admin/AdminEnrollmentsPage.jsx';
-import SearchPage from '../pages/SearchPage.jsx';
-import ActivityPage from '../pages/ActivityPage.jsx';
-import NotificationsPage from '../pages/NotificationsPage.jsx';
-import AnnouncementsPage from '../pages/dashboard/AnnouncementsPage.jsx';
-import AdminAiSettingsPage from '../pages/dashboard/AdminAiSettingsPage.jsx';
+import AdminEnrollmentsPage from "../pages/admin/AdminEnrollmentsPage.jsx";
+import SearchPage from "../pages/SearchPage.jsx";
+import ActivityPage from "../pages/ActivityPage.jsx";
+import NotificationsPage from "../pages/NotificationsPage.jsx";
+import AnnouncementsPage from "../pages/dashboard/AnnouncementsPage.jsx";
+import AdminAiSettingsPage from "../pages/dashboard/AdminAiSettingsPage.jsx";
+import StudentDashboardPage from "../components/dashboard/StudentDashboardPage.jsx";
 
 export default function AppRoutes() {
   return (
@@ -89,13 +90,12 @@ export default function AppRoutes() {
           />
         </Route>
         <Route
-          path="student/*"
-          element={
-            <ProtectedRoute roles={[ROLES.STUDENT]}>
-              <RoleAreaPage title="Student area" />
-            </ProtectedRoute>
-          }
-        />
+          path="student"
+          element={<DashboardGate area="student" roles={[ROLES.STUDENT]} />}
+        >
+          <Route index element={<StudentDashboardPage />} />
+          <Route path="performance" element={<StudentPerformancePage />} />
+        </Route>
         <Route path="*" element={<NotFoundPage />} />
       </Route>
 
@@ -104,7 +104,10 @@ export default function AppRoutes() {
         element={<DashboardGate area="admin" roles={[ROLES.ADMIN]} />}
       >
         <Route path="ai-settings" element={<AdminAiSettingsPage />} />
-        <Route path="announcements" element={<AnnouncementsPage area="admin" />} />
+        <Route
+          path="announcements"
+          element={<AnnouncementsPage area="admin" />}
+        />
         <Route path="notifications" element={<NotificationsPage />} />
         <Route path="analytics" element={<AdminAnalyticsPage />} />
         <Route path="enrollments" element={<AdminEnrollmentsPage />} />
@@ -130,7 +133,10 @@ export default function AppRoutes() {
         path="mentor"
         element={<DashboardGate area="mentor" roles={[ROLES.MENTOR]} />}
       >
-        <Route path="announcements" element={<AnnouncementsPage area="mentor" />} />
+        <Route
+          path="announcements"
+          element={<AnnouncementsPage area="mentor" />}
+        />
         <Route path="notifications" element={<NotificationsPage />} />
         <Route path="analytics" element={<MentorAnalyticsPage />} />
         <Route

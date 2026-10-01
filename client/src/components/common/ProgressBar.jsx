@@ -1,30 +1,47 @@
-import { formatPercentage } from '../../utils/progress.js';
+export default function ProgressBar({
+  value = 0,
+  max = 100,
+  showLabel = false,
+  className = '',
+}) {
+  const percentage =
+    max > 0
+      ? Math.min(100, Math.max(0, (value / max) * 100))
+      : 0;
 
-// Accessible progress indicator. Completion is never conveyed by color alone: the percentage and the
-// "X / Y completed" fraction are always shown as text next to the bar.
-export default function ProgressBar({ completed, total, label = 'Course progress', size = 'md' }) {
-  const percentage = total === 0 ? 0 : Math.round((completed / total) * 100);
-  const height = size === 'sm' ? 'h-1.5' : 'h-2.5';
+  const roundedPercentage = Math.round(percentage);
 
   return (
-    <div>
-      <div className="flex items-center justify-between text-xs text-slate-600">
-        <span>{label}</span>
-        <span className="font-medium text-slate-900">{formatPercentage(percentage)}</span>
-      </div>
+    <div className={className}>
+      {showLabel && (
+        <div className="mb-2 flex items-center justify-between gap-3">
+          <span className="font-mono text-[10px] font-semibold uppercase tracking-[0.14em] text-neutral-500">
+            Progress
+          </span>
+
+          <span className="font-mono text-[10px] font-semibold text-[#FF3E00]">
+            {roundedPercentage}%
+          </span>
+        </div>
+      )}
+
       <div
+        className="relative h-1.5 w-full overflow-hidden rounded-none bg-[#2A2A2A]"
         role="progressbar"
-        aria-valuenow={percentage}
-        aria-valuemin={0}
-        aria-valuemax={100}
-        aria-label={label}
-        className={`mt-1 w-full overflow-hidden rounded-full bg-slate-200 ${height}`}
+        aria-valuenow={roundedPercentage}
+        aria-valuemin="0"
+        aria-valuemax="100"
       >
-        <div className={`${height} rounded-full bg-indigo-600 transition-all`} style={{ width: `${percentage}%` }} />
+        <div
+          className={[
+            'h-full',
+            'bg-[#FF3E00]',
+            'transition-[width] duration-500 ease-out',
+          ].join(' ')}
+          style={{ width: `${percentage}%` }}
+        />
       </div>
-      <p className="mt-1 text-xs text-slate-600">
-        {completed} / {total} concept{total === 1 ? '' : 's'} completed
-      </p>
     </div>
   );
 }
+

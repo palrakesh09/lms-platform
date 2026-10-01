@@ -13,5 +13,7 @@ export const hasRole = (user, roles) => Boolean(user) && roles.includes(user.rol
 export const getDashboardPath = (user) => {
   if (hasRole(user, [ROLES.ADMIN])) return '/admin';
   if (hasRole(user, [ROLES.MENTOR])) return '/mentor';
+  if (hasRole(user, [ROLES.STUDENT])) return '/student';
+
   return null;
 };

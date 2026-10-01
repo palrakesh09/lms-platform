@@ -2,16 +2,37 @@ import { Link } from 'react-router';
 
 export default function NotFoundPage() {
   return (
-    <div className="py-16 text-center">
-      <p className="text-sm font-semibold text-indigo-600">404</p>
-      <h1 className="mt-2 text-3xl font-bold tracking-tight">Page not found</h1>
-      <p className="mt-2 text-slate-600">The page you are looking for doesn't exist.</p>
-      <Link
-        to="/"
-        className="mt-6 inline-block rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-indigo-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
-      >
-        Back to home
-      </Link>
+    <div className="flex min-h-[60vh] items-center justify-center px-4 py-12">
+      <div className="w-full max-w-lg border border-[#2A2A2A] bg-[#111111] p-6 text-center sm:p-10">
+        <div className="mx-auto flex h-16 w-16 items-center justify-center border border-[#3A3A3A] bg-[#171717]">
+          <span className="font-mono text-xl font-bold text-neutral-300">
+            404
+          </span>
+        </div>
+
+        <span className="mt-6 block font-mono text-[10px] uppercase tracking-[0.2em] text-[#FF3E00]">
+          Navigation Error
+        </span>
+
+        <h1 className="mt-2 text-2xl font-bold tracking-tight text-white sm:text-3xl">
+          Page not found
+        </h1>
+
+        <p className="mx-auto mt-3 max-w-md text-sm leading-6 text-neutral-500">
+          The page you are looking for doesn&apos;t
+          exist or may have been moved.
+        </p>
+
+        <div className="mt-7">
+          <Link
+            to="/"
+            className="inline-flex min-h-10 w-full items-center justify-center border border-[#FF3E00] bg-[#FF3E00] px-5 text-sm font-semibold text-white transition hover:border-[#FF531F] hover:bg-[#FF531F] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#FF3E00] sm:w-auto"
+          >
+            Back to home
+          </Link>
+        </div>
+      </div>
     </div>
   );
 }
+

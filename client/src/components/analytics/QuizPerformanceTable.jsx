@@ -1,27 +1,148 @@
 import StatusBadge from '../common/StatusBadge.jsx';
 import { formatDate } from '../../utils/formatters.js';
 
-const th = 'px-4 py-3';
+const th =
+  'px-3 py-3 sm:px-4 sm:py-3';
 
 export default function QuizPerformanceTable({ quizzes }) {
   return (
-    <div className="overflow-x-auto rounded-xl border border-slate-200 bg-white shadow-sm">
-      <table className="min-w-full divide-y divide-slate-200 text-left text-sm">
-        <caption className="sr-only">Your quiz performance</caption>
-        <thead className="bg-slate-50 text-xs font-semibold uppercase tracking-wide text-slate-600">
-          <tr><th scope="col" className={th}>Quiz</th><th scope="col" className={`${th} hidden sm:table-cell`}>Course</th><th scope="col" className={th}>Attempts</th><th scope="col" className={th}>Best</th><th scope="col" className={`${th} hidden md:table-cell`}>Latest</th><th scope="col" className={`${th} hidden md:table-cell`}>Average</th><th scope="col" className={th}>Status</th><th scope="col" className={`${th} hidden lg:table-cell`}>Last attempt</th></tr>
+    <div className="w-full overflow-x-auto border border-neutral-800 bg-[#111111]">
+      <table className="min-w-[720px] w-full text-left text-sm">
+        <caption className="sr-only">
+          Your quiz performance
+        </caption>
+
+        <thead className="border-b border-neutral-800 bg-[#171717]">
+          <tr>
+            <th
+              scope="col"
+              className={`${th} font-mono text-[10px] font-bold uppercase tracking-wider text-neutral-500`}
+            >
+              Quiz
+            </th>
+
+            <th
+              scope="col"
+              className={`${th} hidden font-mono text-[10px] font-bold uppercase tracking-wider text-neutral-500 sm:table-cell`}
+            >
+              Course
+            </th>
+
+            <th
+              scope="col"
+              className={`${th} font-mono text-[10px] font-bold uppercase tracking-wider text-neutral-500`}
+            >
+              Attempts
+            </th>
+
+            <th
+              scope="col"
+              className={`${th} font-mono text-[10px] font-bold uppercase tracking-wider text-neutral-500`}
+            >
+              Best
+            </th>
+
+            <th
+              scope="col"
+              className={`${th} hidden font-mono text-[10px] font-bold uppercase tracking-wider text-neutral-500 md:table-cell`}
+            >
+              Latest
+            </th>
+
+            <th
+              scope="col"
+              className={`${th} hidden font-mono text-[10px] font-bold uppercase tracking-wider text-neutral-500 md:table-cell`}
+            >
+              Average
+            </th>
+
+            <th
+              scope="col"
+              className={`${th} font-mono text-[10px] font-bold uppercase tracking-wider text-neutral-500`}
+            >
+              Status
+            </th>
+
+            <th
+              scope="col"
+              className={`${th} hidden font-mono text-[10px] font-bold uppercase tracking-wider text-neutral-500 lg:table-cell`}
+            >
+              Last attempt
+            </th>
+          </tr>
         </thead>
-        <tbody className="divide-y divide-slate-100">
+
+        <tbody>
           {quizzes.map((quiz) => (
-            <tr key={quiz.quizId}>
-              <td className={th}>{quiz.quizTitle}</td>
-              <td className={`${th} hidden text-slate-700 sm:table-cell`}>{quiz.courseTitle ?? '—'}</td>
-              <td className={th}>{quiz.attempts}</td>
-              <td className={th}>{quiz.bestScore}%</td>
-              <td className={`${th} hidden md:table-cell`}>{quiz.latestScore}%</td>
-              <td className={`${th} hidden md:table-cell`}>{quiz.averageScore}%</td>
-              <td className={th}><StatusBadge status={quiz.passed ? 'active' : 'inactive'} label={quiz.passed ? 'Passed' : 'Failed'} /></td>
-              <td className={`${th} hidden whitespace-nowrap lg:table-cell`}>{formatDate(quiz.lastAttemptedAt)}</td>
+            <tr
+              key={quiz.quizId}
+              className="border-b border-neutral-800/80 transition-colors last:border-b-0 hover:bg-[#171717]"
+            >
+              <td
+                className={`${th} max-w-[220px]`}
+              >
+                <div className="min-w-0">
+                  <p className="truncate font-medium text-white">
+                    {quiz.quizTitle}
+                  </p>
+
+                  {/* Course shown on mobile where the course column is hidden */}
+                  <p className="mt-1 truncate text-xs text-neutral-600 sm:hidden">
+                    {quiz.courseTitle ?? '—'}
+                  </p>
+                </div>
+              </td>
+
+              <td
+                className={`${th} hidden max-w-[220px] truncate text-neutral-400 sm:table-cell`}
+              >
+                {quiz.courseTitle ?? '—'}
+              </td>
+
+              <td
+                className={`${th} font-mono text-xs text-neutral-400`}
+              >
+                {quiz.attempts}
+              </td>
+
+              <td
+                className={`${th} font-mono text-xs font-semibold text-white`}
+              >
+                {quiz.bestScore}%
+              </td>
+
+              <td
+                className={`${th} hidden font-mono text-xs text-neutral-400 md:table-cell`}
+              >
+                {quiz.latestScore}%
+              </td>
+
+              <td
+                className={`${th} hidden font-mono text-xs text-neutral-400 md:table-cell`}
+              >
+                {quiz.averageScore}%
+              </td>
+
+              <td className={th}>
+                <StatusBadge
+                  status={
+                    quiz.passed
+                      ? 'active'
+                      : 'inactive'
+                  }
+                  label={
+                    quiz.passed
+                      ? 'Passed'
+                      : 'Failed'
+                  }
+                />
+              </td>
+
+              <td
+                className={`${th} hidden whitespace-nowrap font-mono text-xs text-neutral-500 lg:table-cell`}
+              >
+                {formatDate(quiz.lastAttemptedAt)}
+              </td>
             </tr>
           ))}
         </tbody>
@@ -29,3 +150,4 @@ export default function QuizPerformanceTable({ quizzes }) {
     </div>
   );
 }
+

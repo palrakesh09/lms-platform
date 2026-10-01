@@ -1,10 +1,35 @@
-// ConsolePanel.jsx
-import { secondaryButton } from '../common/buttonClasses.js';
-export default function ConsolePanel({ lines, onClear }) {
+export default function ConsolePanel({
+  lines,
+  onClear,
+}) {
   return (
-    <div className="rounded-md border border-slate-300 bg-slate-900 p-2">
-      <div className="mb-1 flex justify-end"><button type="button" onClick={onClear} className="text-xs text-slate-300 underline">Clear</button></div>
-      <pre role="log" aria-live="polite" className="max-h-32 overflow-y-auto font-mono text-xs text-slate-100">{lines.join('\n') || 'No output yet.'}</pre>
+    <div className="overflow-hidden border border-[#2A2A2A] bg-[#0D0D0D]">
+      <div className="flex items-center justify-between border-b border-[#2A2A2A] bg-[#111111] px-3 py-2">
+        <div className="flex items-center gap-2">
+          <span className="h-2 w-2 bg-[#22C55E]" />
+
+          <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-neutral-500">
+            Console
+          </span>
+        </div>
+
+        <button
+          type="button"
+          onClick={onClear}
+          className="font-mono text-[10px] uppercase tracking-wider text-neutral-500 transition hover:text-[#FF3E00] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#FF3E00]"
+        >
+          Clear
+        </button>
+      </div>
+
+      <pre
+        role="log"
+        aria-live="polite"
+        className="max-h-40 min-h-20 overflow-x-auto overflow-y-auto p-3 font-mono text-xs leading-6 text-neutral-300"
+      >
+        {lines.join('\n') || 'No output yet.'}
+      </pre>
     </div>
   );
 }
+
